@@ -105,9 +105,9 @@ export default function LoginPage() {
       if (error.code === 'auth/operation-not-allowed') {
         message = "Phone auth is not enabled in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
-        message = "Too many attempts. Please try again later.";
+        message = "Too many attempts. Please try again later or use a 'Test Number' in Firebase Console.";
       } else if (error.message?.includes('billing')) {
-        message = "Blaze plan required for real SMS. Use a Test Number for development.";
+        message = "Blaze plan required for real SMS. Add your phone as a 'Test Number' to avoid this during development.";
       }
       
       toast({
@@ -116,6 +116,7 @@ export default function LoginPage() {
         description: message,
       });
 
+      // Clear recaptcha on error to allow retry
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.clear();
         (window as any).recaptchaVerifier = null;
@@ -288,7 +289,7 @@ export default function LoginPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-xs font-bold text-green-800">Blaze Plan Enabled</AlertTitle>
                 <AlertDescription className="text-[10px] text-green-700">
-                  Real SMS is active. For faster testing, add your phone number as a "Test Number" in Firebase Console.
+                  Real SMS is active. For faster testing and to avoid "Too Many Requests", add your number as a "Test Number" in Firebase Console.
                 </AlertDescription>
              </Alert>
           </div>
