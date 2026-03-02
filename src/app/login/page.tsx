@@ -106,8 +106,6 @@ export default function LoginPage() {
         message = "Phone auth is not enabled in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
         message = "Too many attempts. Please try again later or use a 'Test Number' in Firebase Console.";
-      } else if (error.message?.includes('billing')) {
-        message = "Blaze plan required for real SMS. Add your phone as a 'Test Number' to avoid this during development.";
       }
       
       toast({

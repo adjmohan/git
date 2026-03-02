@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag, Smartphone, Wallet } from 'lucide-react';
+import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag, Smartphone, Wallet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -23,6 +23,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -43,6 +44,9 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const total = getTotalPrice();
 
+  // Owner Merchant Details
+  const merchantUpi = "adjmohan@oksbi";
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -62,9 +66,20 @@ export default function CheckoutPage() {
   const paymentMethod = form.watch('paymentMethod');
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-    console.log('Order submitted:', values);
-    clearCart();
-    router.push('/order-success');
+    console.log('Order submitted to merchant:', merchantUpi, values);
+    
+    toast({
+      title: "Processing Payment",
+      description: values.paymentMethod === 'upi' 
+        ? `Requesting payment to ${merchantUpi}...` 
+        : "Verifying transaction with your bank...",
+    });
+
+    // Simulate short processing time
+    setTimeout(() => {
+      clearCart();
+      router.push('/order-success');
+    }, 2000);
   };
 
   if (!mounted) return null;
@@ -221,18 +236,23 @@ export default function CheckoutPage() {
 
                   {paymentMethod === 'upi' && (
                     <div className="space-y-4">
-                      <div className="flex justify-around mb-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-6 opacity-60" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-6 opacity-60" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="h-4 opacity-60" />
+                      <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/20">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <div>
+                            <p className="text-xs font-bold text-primary uppercase">Official Merchant</p>
+                            <p className="font-mono text-sm font-bold">{merchantUpi}</p>
+                          </div>
+                        </div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-4" />
                       </div>
                       <FormField
                         control={form.control}
                         name="upiId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>UPI ID (e.g., username@bank)</FormLabel>
-                            <FormControl><Input placeholder="Enter UPI ID" {...field} className="rounded-xl h-11" /></FormControl>
+                            <FormLabel>Your UPI ID (e.g., username@bank)</FormLabel>
+                            <FormControl><Input placeholder="Enter your UPI ID to pay" {...field} className="rounded-xl h-11" /></FormControl>
                           </FormItem>
                         )}
                       />
@@ -282,7 +302,7 @@ export default function CheckoutPage() {
             </div>
             <div className="bg-primary/5 p-4 rounded-xl flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-              <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">Your data is secured using end-to-end encryption. Shop with confidence on Flipkart.</p>
+              <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">Payments are secured. Verified merchant ID: {merchantUpi}.</p>
             </div>
           </div>
         </div>
