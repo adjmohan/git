@@ -40,6 +40,20 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
+  // Cleanup recaptcha on unmount
+  useEffect(() => {
+    return () => {
+      if ((window as any).recaptchaVerifier) {
+        try {
+          (window as any).recaptchaVerifier.clear();
+        } catch (e) {
+          console.error("Error clearing recaptcha", e);
+        }
+        (window as any).recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
   const phoneForm = useForm<z.infer<typeof phoneSchema>>({
     resolver: zodResolver(phoneSchema),
     defaultValues: { phoneNumber: '' },
@@ -51,10 +65,24 @@ export default function LoginPage() {
   });
 
   const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-      });
+    try {
+      if (!(window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: (response: any) => {
+            console.log("Recaptcha resolved");
+          },
+          'expired-callback': () => {
+            toast({ variant: "destructive", title: "Recaptcha Expired", description: "Please try again." });
+            if ((window as any).recaptchaVerifier) {
+              (window as any).recaptchaVerifier.clear();
+              (window as any).recaptchaVerifier = null;
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Recaptcha setup error:", err);
     }
   };
 
@@ -63,24 +91,39 @@ export default function LoginPage() {
     try {
       setupRecaptcha();
       const appVerifier = (window as any).recaptchaVerifier;
+      if (!appVerifier) throw new Error("Recaptcha not initialized");
+
       const formatPhone = `+91${values.phoneNumber}`;
       const confirmation = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
       setVerificationId(confirmation);
       setStep('otp');
       toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
     } catch (error: any) {
-      console.error(error);
-      const message = error.code === 'auth/operation-not-allowed' 
-        ? "Phone sign-in is not enabled in Firebase Console. Please enable it in the Authentication tab."
-        : error.message || "Failed to send OTP. Please try again.";
+      console.error("Full Auth Error:", error);
+      
+      let message = "Failed to send OTP. Please try again.";
+      
+      if (error.code === 'auth/operation-not-allowed') {
+        message = "Phone sign-in is not enabled in Firebase Console. Please enable it in the Authentication > Sign-in method tab.";
+      } else if (error.code === 'auth/invalid-phone-number') {
+        message = "The phone number is invalid.";
+      } else if (error.code === 'auth/too-many-requests') {
+        message = "Too many attempts. Please try again later.";
+      } else if (error.message) {
+        message = error.message;
+      }
       
       toast({
         variant: "destructive",
         title: "Error",
         description: message,
       });
+
+      // Reset recaptcha on error so it can be re-initialized
       if ((window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier.clear();
+        try {
+          (window as any).recaptchaVerifier.clear();
+        } catch (e) {}
         (window as any).recaptchaVerifier = null;
       }
     } finally {
@@ -95,7 +138,6 @@ export default function LoginPage() {
       const result = await verificationId.confirm(values.otp);
       const firebaseUser = result.user;
 
-      // Check if user profile exists in Firestore, if not create it
       const userRef = doc(db, 'users', firebaseUser.uid);
       const userSnap = await getDoc(userRef);
       
@@ -111,6 +153,7 @@ export default function LoginPage() {
       toast({ title: "Welcome!", description: "Logged in successfully." });
       router.push('/');
     } catch (error: any) {
+      console.error("OTP Confirmation Error:", error);
       toast({
         variant: "destructive",
         title: "Verification Failed",
