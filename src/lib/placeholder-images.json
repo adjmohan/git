@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "Tech Gadgets Banner",
+      "imageUrl": "https://images.unsplash.com/photo-1597787185613-cf51d79fa7e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxlbGVjdHJvbmljcyUyMHRlY2hub2xvZ3l8ZW58MHx8fHwxNzcyNDM1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "electronics technology"
+    },
+    {
+      "id": "hero-2",
+      "description": "Fashion Sale Banner",
+      "imageUrl": "https://images.unsplash.com/photo-1511511450040-677116ff389e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwY2xvdGhpbmd8ZW58MHx8fHwxNzcyMzY5NjI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fashion clothing"
+    },
+    {
+      "id": "cat-electronics",
+      "description": "Electronics Category",
+      "imageUrl": "https://images.unsplash.com/photo-1717147727046-0db3701ed4ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxsYXB0b3AlMjBwaG9uZXxlbnwwfHx8fDE3NzI0MzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop phone"
+    },
+    {
+      "id": "cat-fashion",
+      "description": "Fashion Category",
+      "imageUrl": "https://images.unsplash.com/photo-1620799139834-6b8f844fbe61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzbmVha2VycyUyMHQtc2hpcnR8ZW58MHx8fHwxNzcyNDM1NTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sneakers t-shirt"
+    },
+    {
+      "id": "cat-home",
+      "description": "Home Category",
+      "imageUrl": "https://images.unsplash.com/photo-1567016526105-22da7c13161a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBkZWNvcnxlbnwwfHx8fDE3NzI0MzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "furniture decor"
+    },
+    {
+      "id": "product-1",
+      "description": "Smartphone Ultra",
+      "imageUrl": "https://images.unsplash.com/photo-1741061963569-9d0ef54d10d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzbWFydHBob25lJTIwbW9iaWxlfGVufDB8fHx8MTc3MjM4MTE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smartphone mobile"
+    },
+    {
+      "id": "product-2",
+      "description": "Wireless Headphones",
+      "imageUrl": "https://images.unsplash.com/photo-1634717037148-4dc76c09a328?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxoZWFkcGhvbmVzJTIwYXVkaW98ZW58MHx8fHwxNzcyMzU2NzU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "headphones audio"
+    },
+    {
+      "id": "product-3",
+      "description": "Smart Watch Series 7",
+      "imageUrl": "https://images.unsplash.com/photo-1678982982281-2faf188d1629?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzbWFydHdhdGNoJTIwZ2FkZ2V0fGVufDB8fHx8MTc3MjM1Njc1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smartwatch gadget"
+    },
+    {
+      "id": "product-4",
+      "description": "Premium Cotton T-Shirt",
+      "imageUrl": "https://images.unsplash.com/photo-1759572095384-1a7e646d0d4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx0LXNoaXJ0JTIwY2xvdGhlc3xlbnwwfHx8fDE3NzI0MzU1MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "t-shirt clothes"
+    }
+  ]
 }

@@ -41,13 +41,19 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden bg-secondary/30">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
-          data-ai-hint={product.name}
-        />
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
+            data-ai-hint={product.name}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+            No Image
+          </div>
+        )}
         {discount > 0 && (
           <div className="absolute bottom-3 left-3 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded-full">
             {discount}% OFF

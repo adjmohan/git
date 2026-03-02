@@ -1,7 +1,8 @@
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, ArrowRight, Zap, ShieldCheck, Truck, RotateCcw, Phone } from 'lucide-react';
+import { Truck, ShieldCheck, RotateCcw, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -76,21 +77,25 @@ const featuredProducts: Product[] = [
 ];
 
 export default function Home() {
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-1')?.imageUrl;
+
   return (
     <div className="flex flex-col gap-8 pb-20 bg-gray-100">
       {/* Hero Banner Section */}
       <section className="relative w-full h-[300px] overflow-hidden">
-        <Image
-          src={PlaceHolderImages.find(img => img.id === 'hero-1')?.imageUrl || ''}
-          alt="Flipkart Sale"
-          fill
-          className="object-cover"
-          priority
-        />
+        {heroImage && (
+          <Image
+            src={heroImage}
+            alt="Flipkart Sale"
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
         <div className="absolute inset-0 bg-black/10 flex items-center px-10">
           <div className="max-w-lg text-white space-y-4">
-             <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg">Big Billion Days</h1>
-             <p className="text-xl drop-shadow-md">Biggest Offers of the Year!</p>
+             <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg text-white">Big Billion Days</h1>
+             <p className="text-xl drop-shadow-md text-white">Biggest Offers of the Year!</p>
              <Link href="/products">
                 <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold rounded-sm px-8">
                   Shop Now
@@ -105,13 +110,15 @@ export default function Home() {
         <div className="container mx-auto px-4 flex justify-between gap-8 min-w-max">
           {categories.map((cat) => (
             <Link key={cat.id} href={`/products?category=${cat.slug}`} className="flex flex-col items-center gap-2 group">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden transition-transform group-hover:scale-110">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative w-16 h-16 rounded-full overflow-hidden transition-transform group-hover:scale-110 bg-gray-50">
+                {cat.image && (
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover"
+                  />
+                )}
               </div>
               <span className="text-sm font-bold text-gray-700">{cat.name}</span>
             </Link>
@@ -126,8 +133,10 @@ export default function Home() {
           <h3 className="font-bold border-b pb-2">Deals of the Day</h3>
           <div className="space-y-4">
             <div className="text-center group cursor-pointer">
-              <div className="relative aspect-square mb-2 overflow-hidden">
-                 <Image src={featuredProducts[0].image} alt="deal" fill className="object-contain group-hover:scale-105 transition-transform" />
+              <div className="relative aspect-square mb-2 overflow-hidden bg-gray-50 rounded">
+                {featuredProducts[0].image && (
+                   <Image src={featuredProducts[0].image} alt="deal" fill className="object-contain group-hover:scale-105 transition-transform" />
+                )}
               </div>
               <p className="text-sm font-medium">Smartphones</p>
               <p className="text-primary font-bold">Extra 10% Off</p>
