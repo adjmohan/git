@@ -67,21 +67,24 @@ export default function CheckoutPage() {
     if (values.paymentMethod === 'upi') {
       // Construct UPI Deep Link for One-Click Payment
       // pa: payee address, pn: payee name, am: amount, cu: currency, tn: transaction note
-      const upiUrl = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent('Order Payment')}`;
+      const formattedAmount = total.toFixed(2);
+      const upiUrl = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent('Flipkart Order')}`;
       
       toast({
-        title: "Opening Payment App",
-        description: "Redirecting you to complete the payment via GPay/PhonePe...",
+        title: "Redirecting to UPI",
+        description: "Opening GPay/PhonePe/UPI app to complete payment...",
       });
 
-      // Try to open the UPI app intent
-      window.location.href = upiUrl;
+      // Attempt to open the UPI app intent
+      // Using window.location.assign for better deep link handling on mobile browsers
+      window.location.assign(upiUrl);
 
-      // Simulate completion after a delay (since we can't track cross-app success in web only)
+      // We wait for the user to return. Since we can't track cross-app success via web,
+      // we simulate the order success for this demo/prototype.
       setTimeout(() => {
         clearCart();
         router.push('/order-success');
-      }, 3000);
+      }, 5000);
       return;
     }
 
@@ -241,11 +244,12 @@ export default function CheckoutPage() {
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-6" />
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-6" />
                       </div>
-                      <p className="text-sm font-medium text-gray-600">Clicking Pay will open your UPI app to complete the transaction securely.</p>
-                      <div className="bg-primary/5 p-3 rounded-sm border border-primary/10 inline-block">
-                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Verified Merchant</p>
-                        <p className="text-xs font-mono font-bold text-gray-700">{MERCHANT_UPI}</p>
+                      <p className="text-sm font-medium text-gray-600">Verified Recipient: <span className="font-bold text-gray-800">{MERCHANT_NAME}</span></p>
+                      <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Owner Merchant ID</p>
+                        <p className="text-lg font-mono font-bold text-gray-900">{MERCHANT_UPI}</p>
                       </div>
+                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" below will automatically launch your GPay/UPI app.</p>
                     </div>
                   )}
 
@@ -278,7 +282,7 @@ export default function CheckoutPage() {
 
         <div className="lg:pl-8">
           <div className="bg-white border border-gray-200 rounded shadow-sm p-6 sticky top-24 space-y-6">
-            <h2 className="font-headline font-bold text-xl uppercase tracking-tighter italic border-b pb-3">Price Details</h2>
+            <h2 className="font-headline font-bold text-xl uppercase tracking-tighter italic border-b pb-3 text-primary">Price Details</h2>
             <div className="space-y-4 max-h-[300px] overflow-auto pr-2 scrollbar-hide">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
@@ -311,7 +315,7 @@ export default function CheckoutPage() {
             </div>
             <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products.</p>
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products Verified to Merchant: <span className="underline">{MERCHANT_UPI}</span>.</p>
             </div>
           </div>
         </div>
