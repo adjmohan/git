@@ -73,14 +73,14 @@ export default function CheckoutPage() {
         description: "Redirecting to GPay/PhonePe/UPI to complete payment...",
       });
 
-      // Launch UPI Deep Link
+      // Launch UPI Deep Link to trigger GPay/PhonePe app intent
       window.location.assign(upiUrl);
 
-      // Simulate completion after a brief wait
+      // Simulate completion after a brief wait for demo purposes
       setTimeout(() => {
         clearCart();
         router.push('/order-success');
-      }, 5000);
+      }, 8000);
       return;
     }
 
@@ -239,10 +239,10 @@ export default function CheckoutPage() {
                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-6" />
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-6" />
                       </div>
-                      <p className="text-sm font-medium text-gray-600">Verified Recipient: <span className="font-bold text-gray-800">{MERCHANT_NAME}</span></p>
+                      <p className="text-sm font-medium text-gray-600">Recipient ID: <span className="font-bold text-gray-800">{MERCHANT_UPI}</span></p>
                       <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
-                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">UPI ID</p>
-                        <p className="text-lg font-mono font-bold text-gray-900">{MERCHANT_UPI}</p>
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Status</p>
+                        <p className="text-lg font-headline font-bold text-gray-900">Verified Merchant</p>
                       </div>
                       <p className="text-xs text-muted-foreground italic">Clicking "Pay" will launch your GPay or default UPI app automatically.</p>
                     </div>
