@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -14,15 +15,15 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'fi
 import { doc, getDoc } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { toast } from '@/hooks/use-toast';
-import { Smartphone, ShieldCheck, ArrowRight, Info } from 'lucide-react';
+import { Smartphone, ShieldCheck, ArrowRight, Info, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const phoneSchema = z.object({
-  phoneNumber: z.string().min(10, 'Enter a valid 10-digit mobile number').max(10, 'Enter a valid 10-digit mobile number'),
+  phoneNumber: z.string().length(10, 'Enter a valid 10-digit mobile number'),
 });
 
 const otpSchema = z.object({
-  otp: z.string().min(6, 'OTP must be 6 digits').max(6, 'OTP must be 6 digits'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
 });
 
 export default function LoginPage() {
@@ -33,7 +34,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationId, setVerificationId] = useState<ConfirmationResult | null>(null);
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -41,46 +42,24 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  useEffect(() => {
-    return () => {
-      if ((window as any).recaptchaVerifier) {
-        try {
-          (window as any).recaptchaVerifier.clear();
-        } catch (e) {}
-        (window as any).recaptchaVerifier = null;
-      }
-    };
-  }, []);
-
-  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
-    resolver: zodResolver(phoneSchema),
-    defaultValues: { phoneNumber: '' },
-  });
-
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: { otp: '' },
-  });
-
   const setupRecaptcha = () => {
+    if ((window as any).recaptchaVerifier) return (window as any).recaptchaVerifier;
+    
     try {
-      if (!(window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            console.log("reCAPTCHA solved");
-          },
-          'expired-callback': () => {
-            toast({ variant: "destructive", title: "Recaptcha Expired", description: "Please try again." });
-            if ((window as any).recaptchaVerifier) {
-              (window as any).recaptchaVerifier.clear();
-              (window as any).recaptchaVerifier = null;
-            }
-          }
-        });
-      }
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log("reCAPTCHA solved");
+        },
+        'expired-callback': () => {
+          toast({ variant: "destructive", title: "reCAPTCHA Expired", description: "Please try again." });
+        }
+      });
+      (window as any).recaptchaVerifier = verifier;
+      return verifier;
     } catch (err) {
-      console.error("reCAPTCHA setup error:", err);
+      console.error("reCAPTCHA Error:", err);
+      return null;
     }
   };
 
@@ -88,41 +67,37 @@ export default function LoginPage() {
     setIsLoading(true);
     setAuthError(null);
     try {
-      setupRecaptcha();
-      const appVerifier = (window as any).recaptchaVerifier;
-      if (!appVerifier) throw new Error("Recaptcha not initialized");
+      const appVerifier = setupRecaptcha();
+      if (!appVerifier) throw new Error("reCAPTCHA initialization failed.");
 
       const formatPhone = `+91${values.phoneNumber}`;
       const confirmation = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
       setVerificationId(confirmation);
       setStep('otp');
-      toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
+      toast({ title: "OTP Sent", description: `Verification code sent to ${formatPhone}` });
     } catch (error: any) {
       console.error("Auth Error:", error);
-      let message = "Failed to send OTP.";
-      
-      if (error.code === 'auth/operation-not-allowed') {
-        message = "Phone Authentication is not enabled in Firebase Console.";
-        setAuthError("Please go to Firebase Console > Authentication > Sign-in method and enable 'Phone'.");
-      } else if (error.code === 'auth/billing-not-enabled') {
-        message = "SMS Auth requires billing (Blaze plan) for this project.";
-        setAuthError("Use 'Test Phone Numbers' in Firebase Console to test for free.");
-      } else if (error.code === 'auth/too-many-requests') {
-        message = "Too many attempts. Try again later or use a Test Number.";
-      }
-      
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || message,
-      });
+      let errorData = { title: "Error", message: error.message || "Failed to send OTP." };
 
-      if ((window as any).recaptchaVerifier) {
-        try {
-          (window as any).recaptchaVerifier.clear();
-        } catch (e) {}
-        (window as any).recaptchaVerifier = null;
+      if (error.code === 'auth/operation-not-allowed') {
+        errorData = {
+          title: "Phone Auth Disabled",
+          message: "Go to Firebase Console > Authentication > Sign-in method and enable 'Phone'."
+        };
+      } else if (error.code === 'auth/billing-not-enabled') {
+        errorData = {
+          title: "Billing Required",
+          message: "Real SMS requires the Firebase Blaze plan. For testing, add your number as a 'Test Number' in the Firebase Console."
+        };
+      } else if (error.code === 'auth/too-many-requests') {
+        errorData = {
+          title: "Too Many Requests",
+          message: "This device is temporarily blocked. Use a Test Number in Firebase Console to continue developing."
+        };
       }
+      
+      setAuthError(errorData);
+      toast({ variant: "destructive", title: errorData.title, description: errorData.message });
     } finally {
       setIsLoading(false);
     }
@@ -148,31 +123,32 @@ export default function LoginPage() {
         }, { merge: true });
       }
 
-      toast({ title: "Welcome!", description: "Logged in successfully." });
+      toast({ title: "Success!", description: "Logged in successfully." });
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Verification Failed",
-        description: "Invalid OTP. Please check and try again.",
-      });
+      toast({ variant: "destructive", title: "Verification Failed", description: "Invalid OTP. Please try again." });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-64px)] bg-[#f1f3f6] flex items-center justify-center p-4">
       <div id="recaptcha-container"></div>
-      <div className="max-w-4xl w-full bg-white rounded-sm shadow-lg overflow-hidden flex flex-col md:flex-row min-h-[500px]">
-        {/* Left Side Info */}
+      
+      <div className="max-w-4xl w-full bg-white rounded-sm shadow-md overflow-hidden flex flex-col md:flex-row min-h-[520px]">
+        {/* Left Side Branding */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
-            <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
-            <p className="text-lg opacity-90 text-white">Get access to your Orders, Wishlist and Recommendations</p>
+            <h1 className="text-3xl font-bold mb-4">Login</h1>
+            <p className="text-lg opacity-80">Get access to your Orders, Wishlist and Recommendations</p>
           </div>
           <div className="hidden md:block">
-             <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/login_img_c4a81e.png" alt="Login Banner" className="w-full opacity-50" />
+             <img 
+               src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/login_img_c4a81e.png" 
+               alt="Login Banner" 
+               className="w-full h-auto object-contain opacity-60" 
+             />
           </div>
         </div>
 
@@ -180,30 +156,30 @@ export default function LoginPage() {
         <div className="p-10 flex-grow flex flex-col justify-center">
           {authError && (
             <Alert variant="destructive" className="mb-6">
-              <Info className="h-4 w-4" />
-              <AlertTitle>Configuration Required</AlertTitle>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{authError.title}</AlertTitle>
               <AlertDescription className="text-xs">
-                {authError}
+                {authError.message}
               </AlertDescription>
             </Alert>
           )}
 
           {step === 'phone' ? (
             <Form {...phoneForm}>
-              <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-6">
+              <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-8">
                 <FormField
                   control={phoneForm.control}
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500 uppercase">Enter Mobile Number</FormLabel>
+                      <FormLabel className="text-xs font-bold text-gray-500 uppercase tracking-wide">Enter Mobile Number</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <span className="absolute left-0 bottom-2 text-sm font-bold text-gray-600">+91 | </span>
+                          <span className="absolute left-0 bottom-2 text-base font-medium text-gray-600 border-r pr-2">+91</span>
                           <Input 
                             placeholder="9999999999" 
                             {...field} 
-                            className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 pl-10 h-10 font-bold tracking-widest text-lg" 
+                            className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 pl-12 h-10 font-bold text-lg tracking-wider" 
                           />
                         </div>
                       </FormControl>
@@ -211,11 +187,15 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <div className="pt-4 space-y-4">
-                   <p className="text-[10px] text-gray-500">
-                      By continuing, you agree to Flipkart's <span className="text-primary cursor-pointer">Terms of Use</span> and <span className="text-primary cursor-pointer">Privacy Policy</span>.
+                <div className="space-y-4">
+                   <p className="text-[10px] text-gray-500 leading-relaxed">
+                      By continuing, you agree to Flipkart's <span className="text-primary cursor-pointer hover:underline">Terms of Use</span> and <span className="text-primary cursor-pointer hover:underline">Privacy Policy</span>.
                    </p>
-                   <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm shadow-md uppercase">
+                   <Button 
+                    type="submit" 
+                    disabled={isLoading} 
+                    className="w-full bg-[#fb641b] hover:bg-[#fb641b]/90 text-white font-bold h-12 rounded-sm shadow-sm uppercase tracking-wide"
+                   >
                       {isLoading ? "Requesting OTP..." : "Continue"}
                    </Button>
                 </div>
@@ -223,13 +203,13 @@ export default function LoginPage() {
             </Form>
           ) : (
             <Form {...otpForm}>
-              <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-6">
+              <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-8">
                 <div className="space-y-2">
                   <h2 className="text-xl font-bold flex items-center gap-2">
                     <ShieldCheck className="w-6 h-6 text-green-600" />
                     Verify OTP
                   </h2>
-                  <p className="text-xs text-gray-500">Sent to +91 {phoneForm.getValues().phoneNumber}</p>
+                  <p className="text-xs text-gray-500 font-medium">Verification code sent to +91 {phoneForm.getValues().phoneNumber}</p>
                 </div>
                 <FormField
                   control={otpForm.control}
@@ -241,21 +221,25 @@ export default function LoginPage() {
                         <Input 
                           placeholder="000000" 
                           {...field} 
-                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 h-12 font-bold tracking-[1em] text-center text-xl" 
+                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 h-12 font-bold tracking-[1em] text-center text-2xl text-primary" 
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="pt-4 space-y-4">
-                   <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm shadow-md uppercase">
+                <div className="space-y-4">
+                   <Button 
+                    type="submit" 
+                    disabled={isLoading} 
+                    className="w-full bg-[#fb641b] hover:bg-[#fb641b]/90 text-white font-bold h-12 rounded-sm shadow-sm uppercase tracking-wide"
+                   >
                       {isLoading ? "Verifying..." : "Verify & Login"}
                    </Button>
                    <button 
                     type="button" 
                     onClick={() => setStep('phone')} 
-                    className="w-full text-center text-primary text-sm font-bold flex items-center justify-center gap-2"
+                    className="w-full text-center text-primary text-sm font-bold flex items-center justify-center gap-1 hover:underline"
                    >
                      Change Number <ArrowRight className="w-4 h-4" />
                    </button>
@@ -264,8 +248,8 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <div className="mt-10 text-center border-t pt-6">
-             <Link href="/register" className="text-primary font-bold text-sm">
+          <div className="mt-12 text-center border-t pt-6">
+             <Link href="/register" className="text-primary font-bold text-sm hover:underline">
                 New to Flipkart? Create an account
              </Link>
           </div>
