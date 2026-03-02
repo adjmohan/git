@@ -77,9 +77,6 @@ export default function LoginPage() {
       try {
         (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
-          callback: () => {
-            // reCAPTCHA solved
-          },
         });
       } catch (error) {
         console.error("Recaptcha init error:", error);
@@ -116,7 +113,6 @@ export default function LoginPage() {
         description: message,
       });
 
-      // Clear recaptcha on error to allow retry
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.clear();
         (window as any).recaptchaVerifier = null;
@@ -133,7 +129,6 @@ export default function LoginPage() {
       const result = await verificationId.confirm(values.otp);
       const firebaseUser = result.user;
 
-      // Sync user to Firestore
       const userRef = doc(db, 'users', firebaseUser.uid);
       const userSnap = await getDoc(userRef);
       
@@ -166,7 +161,7 @@ export default function LoginPage() {
     <div className="min-h-[calc(100vh-64px)] bg-[#f1f3f6] flex items-center justify-center p-4">
       <div id="recaptcha-container"></div>
       <div className="max-w-4xl w-full bg-white rounded-sm shadow-md overflow-hidden flex flex-col md:flex-row min-h-[520px]">
-        {/* Left Side Branding - Flipkart Style */}
+        {/* Left Side Branding */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
             <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
@@ -246,18 +241,19 @@ export default function LoginPage() {
                           maxLength={6}
                           value={field.value}
                           onChange={field.onChange}
-                          render={({ slots }) => (
-                            <InputOTPGroup>
-                              {slots.slice(0, 3).map((slot, index) => (
-                                <InputOTPSlot key={index} {...slot} index={index} />
-                              ))}
-                              <InputOTPSeparator />
-                              {slots.slice(3).map((slot, index) => (
-                                <InputOTPSlot key={index + 3} {...slot} index={index + 3} />
-                              ))}
-                            </InputOTPGroup>
-                          )}
-                        />
+                        >
+                          <InputOTPGroup>
+                            <InputOTPSlot index={0} />
+                            <InputOTPSlot index={1} />
+                            <InputOTPSlot index={2} />
+                          </InputOTPGroup>
+                          <InputOTPSeparator />
+                          <InputOTPGroup>
+                            <InputOTPSlot index={3} />
+                            <InputOTPSlot index={4} />
+                            <InputOTPSlot index={5} />
+                          </InputOTPGroup>
+                        </InputOTP>
                       </FormControl>
                       <FormDescription className="text-xs">
                         Input the code sent via SMS.
@@ -293,7 +289,7 @@ export default function LoginPage() {
              <div className="bg-green-50 border border-green-100 p-3 rounded flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                 <p className="text-[10px] text-green-800">
-                    Real-time SMS is enabled for your Blaze account. Ensure "Phone Auth" is enabled in Firebase Console.
+                    Blaze billing detected. Real SMS is enabled. Ensure Authorized Domains are set in Firebase.
                 </p>
              </div>
              
@@ -301,7 +297,7 @@ export default function LoginPage() {
                 <Info className="h-4 w-4 text-blue-600" />
                 <AlertTitle className="text-xs font-bold uppercase tracking-wider">Developer Tip</AlertTitle>
                 <AlertDescription className="text-[10px]">
-                  Use "Test Phone Numbers" in the Firebase Console to test instantly without waiting for real SMS or incurring costs.
+                  Add your number as a "Test Phone Number" in Firebase Console to bypass SMS costs and reCAPTCHA during development.
                 </AlertDescription>
              </Alert>
           </div>
