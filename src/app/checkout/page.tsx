@@ -31,7 +31,6 @@ const checkoutSchema = z.object({
   city: z.string().min(2, 'City is required'),
   zip: z.string().min(5, 'Valid ZIP code required'),
   paymentMethod: z.enum(['card', 'upi', 'cod']),
-  cardNumber: z.string().optional(),
 });
 
 export default function CheckoutPage() {
@@ -198,8 +197,8 @@ export default function CheckoutPage() {
                             <FormLabel htmlFor="upi" className="flex flex-1 items-center gap-3 cursor-pointer">
                               <Smartphone className="w-5 h-5 text-primary" />
                               <div className="flex-1">
-                                <p className="font-bold text-gray-800">PhonePe / Google Pay / UPI</p>
-                                <p className="text-xs text-muted-foreground">Instant deep-link to your payment app</p>
+                                <p className="font-bold text-gray-800">Instant UPI (GPay / PhonePe)</p>
+                                <p className="text-xs text-muted-foreground">Real-time payment to verified merchant</p>
                               </div>
                               <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/upi-4e311a.svg" alt="UPI" className="h-4" />
                             </FormLabel>
@@ -211,7 +210,7 @@ export default function CheckoutPage() {
                               <CreditCard className="w-5 h-5 text-primary" />
                               <div className="flex-1">
                                 <p className="font-bold text-gray-800">Credit / Debit Card</p>
-                                <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay, Maestro</p>
+                                <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay</p>
                               </div>
                             </FormLabel>
                           </div>
@@ -232,37 +231,20 @@ export default function CheckoutPage() {
                   )}
                 />
 
-                <div className="bg-secondary/30 p-6 rounded shadow-inner border border-border">
+                <div className="bg-secondary/30 p-6 rounded shadow-inner border border-border text-center">
                   {paymentMethod === 'upi' && (
-                    <div className="text-center space-y-4">
-                      <div className="flex items-center justify-center gap-3 py-4">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-6" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-6" />
-                      </div>
-                      <p className="text-sm font-medium text-gray-600">Recipient ID: <span className="font-bold text-gray-800">{MERCHANT_UPI}</span></p>
-                      <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
-                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Status</p>
-                        <p className="text-lg font-headline font-bold text-gray-900">Verified Merchant</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" will launch your GPay or default UPI app automatically.</p>
-                    </div>
-                  )}
-
-                  {paymentMethod === 'card' && (
                     <div className="space-y-4">
-                      <Input placeholder="Card Number" className="rounded-sm h-11" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input placeholder="MM/YY" className="rounded-sm h-11" />
-                        <Input placeholder="CVV" className="rounded-sm h-11" />
+                      <p className="text-sm font-medium text-gray-600">Recipient: <span className="font-bold text-gray-800">{MERCHANT_UPI}</span></p>
+                      <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
+                        <p className="text-lg font-headline font-bold text-primary">Verified Merchant: adjmohan</p>
                       </div>
+                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" will open your UPI app automatically.</p>
                     </div>
                   )}
-
                   {paymentMethod === 'cod' && (
-                    <div className="text-center py-4 space-y-2">
+                    <div className="py-4 space-y-2">
                       <CheckCircle className="w-10 h-10 text-green-600 mx-auto" />
                       <p className="text-sm font-bold text-gray-700 uppercase">Pay on Delivery Available</p>
-                      <p className="text-xs text-muted-foreground">Please keep exact change ready at delivery.</p>
                     </div>
                   )}
                 </div>
@@ -286,7 +268,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex-grow">
                     <h4 className="text-xs font-bold line-clamp-1 text-gray-800">{item.name}</h4>
-                    <p className="text-[10px] text-muted-foreground">Seller: SuperComNet • Qty: {item.quantity}</p>
+                    <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
                   </div>
                   <span className="font-bold text-sm">₹{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
@@ -295,22 +277,13 @@ export default function CheckoutPage() {
             <Separator />
             <div className="space-y-3">
               <div className="flex justify-between text-gray-600 text-sm">
-                <span>Price ({items.length} items)</span>
-                <span>₹{total.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-gray-600 text-sm">
-                <span>Delivery Charges</span>
-                <span className="text-green-600 font-bold">FREE</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-xl font-bold text-gray-900 pt-2">
                 <span>Total Amount</span>
-                <span>₹{total.toLocaleString()}</span>
+                <span className="text-xl font-bold text-gray-900">₹{total.toLocaleString()}</span>
               </div>
             </div>
             <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products. Paying to: <span className="underline">{MERCHANT_UPI}</span>.</p>
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Verified Merchant Payment to: <span className="underline">{MERCHANT_UPI}</span>.</p>
             </div>
           </div>
         </div>
