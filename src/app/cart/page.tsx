@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
@@ -10,11 +10,28 @@ import { useCartStore } from '@/store/useCartStore';
 import { Separator } from '@/components/ui/separator';
 
 export default function CartPage() {
+  const [mounted, setMounted] = useState(false);
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore();
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const totalPrice = getTotalPrice();
   const shipping = totalPrice > 150 ? 0 : 15;
   const tax = totalPrice * 0.08;
   const grandTotal = totalPrice + shipping + tax;
+
+  if (!mounted) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center flex flex-col items-center gap-6">
+        <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mb-4 animate-pulse">
+          <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+        </div>
+        <h1 className="font-headline font-bold text-3xl">Loading your cart...</h1>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -148,7 +165,6 @@ export default function CartPage() {
   );
 }
 
-// Minimal icons for this file
 function ShieldCheck(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -165,6 +181,26 @@ function ShieldCheck(props: React.SVGProps<SVGSVGElement>) {
     >
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
       <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function RotateCcw(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
     </svg>
   );
 }

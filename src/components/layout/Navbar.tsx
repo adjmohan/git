@@ -1,8 +1,9 @@
+
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, LogOut, Settings } from 'lucide-react';
+import { Search, ShoppingCart, Heart, User, Menu, X, ChevronDown, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/store/useCartStore';
@@ -19,9 +20,14 @@ import { Badge } from '@/components/ui/badge';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const itemCount = useCartStore((state) => state.getItemCount());
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -92,7 +98,7 @@ export const Navbar = () => {
           <Link href="/cart" className="flex items-center gap-2 font-bold hover:opacity-80 transition-opacity relative">
             <div className="relative">
               <ShoppingCart className="w-5 h-5" />
-              {itemCount > 0 && (
+              {mounted && itemCount > 0 && (
                 <Badge variant="destructive" className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-[10px] border-2 border-primary">
                   {itemCount}
                 </Badge>
@@ -136,7 +142,7 @@ export const Navbar = () => {
             )}
             <Link href="/cart" className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary">
               <ShoppingCart className="w-5 h-5 text-primary" />
-              <span className="font-medium">Cart ({itemCount})</span>
+              <span className="font-medium">Cart {mounted && itemCount > 0 ? `(${itemCount})` : ''}</span>
             </Link>
             {user && (
               <button onClick={handleLogout} className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary text-destructive w-full text-left">

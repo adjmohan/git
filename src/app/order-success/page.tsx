@@ -1,13 +1,19 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { CheckCircle, Package, ArrowRight, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function OrderSuccessPage() {
-  const orderNumber = "CS-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Generate order number on client only to avoid hydration mismatch
+    const num = "CS-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+    setOrderNumber(num);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center text-center animate-fade-in">
@@ -24,7 +30,7 @@ export default function OrderSuccessPage() {
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center pb-4 border-b">
             <span className="text-muted-foreground font-medium">Order Number</span>
-            <span className="font-bold text-primary">{orderNumber}</span>
+            <span className="font-bold text-primary">{orderNumber || 'Generating...'}</span>
           </div>
           <div className="flex justify-between items-center pb-4 border-b">
             <span className="text-muted-foreground font-medium">Estimated Delivery</span>

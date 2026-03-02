@@ -1,8 +1,9 @@
 
 "use client";
 
-import React, { useState } from 'react';
-import { Search, Filter, SlidersHorizontal, ChevronDown, LayoutGrid, List } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Search, Filter, LayoutGrid, List } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -19,24 +20,104 @@ import {
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 
-const mockProducts: Product[] = Array.from({ length: 12 }).map((_, i) => ({
-  id: `p-${i}`,
-  name: i % 2 === 0 ? `Product Name ${i + 1} - Premium Quality Edition` : `Modern Essential Item ${i + 1}`,
-  description: 'Extended description for the product showcasing features.',
-  price: Math.floor(Math.random() * 500) + 50,
-  originalPrice: Math.floor(Math.random() * 200) + 600,
-  category: i % 3 === 0 ? 'Electronics' : i % 3 === 1 ? 'Fashion' : 'Home',
-  rating: Math.floor(Math.random() * 2) + 3.5,
-  reviewCount: Math.floor(Math.random() * 2000) + 100,
-  image: PlaceHolderImages[i % PlaceHolderImages.length].imageUrl,
-  thumbnails: [],
-  inStock: true,
-  specifications: {}
-}));
+// Stable mock data to avoid hydration mismatches from Math.random()
+const staticProducts: Product[] = [
+  {
+    id: 'p-0',
+    name: 'Smartphone Ultra Pro Max',
+    description: 'The latest technology in the palm of your hand.',
+    price: 999,
+    originalPrice: 1099,
+    category: 'Electronics',
+    rating: 4.8,
+    reviewCount: 1250,
+    image: PlaceHolderImages[0].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  },
+  {
+    id: 'p-1',
+    name: 'Wireless Noise Cancelling Headphones',
+    description: 'Experience pure sound with our flagship headphones.',
+    price: 299,
+    originalPrice: 349,
+    category: 'Electronics',
+    rating: 4.6,
+    reviewCount: 850,
+    image: PlaceHolderImages[1].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  },
+  {
+    id: 'p-2',
+    name: 'Classic Leather Watch',
+    description: 'Timeless design for the modern professional.',
+    price: 150,
+    originalPrice: 199,
+    category: 'Fashion',
+    rating: 4.7,
+    reviewCount: 420,
+    image: PlaceHolderImages[2].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  },
+  {
+    id: 'p-3',
+    name: 'Cotton Casual T-Shirt',
+    description: 'Comfortable everyday wear made from 100% cotton.',
+    price: 25,
+    originalPrice: 35,
+    category: 'Fashion',
+    rating: 4.4,
+    reviewCount: 2100,
+    image: PlaceHolderImages[3].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  },
+  {
+    id: 'p-4',
+    name: 'Smart Home Hub',
+    description: 'Control your entire home with one simple device.',
+    price: 129,
+    originalPrice: 149,
+    category: 'Electronics',
+    rating: 4.5,
+    reviewCount: 310,
+    image: PlaceHolderImages[4].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  },
+  {
+    id: 'p-5',
+    name: 'Premium Coffee Maker',
+    description: 'Brew the perfect cup of coffee every single morning.',
+    price: 79,
+    originalPrice: 99,
+    category: 'Home',
+    rating: 4.3,
+    reviewCount: 1200,
+    image: PlaceHolderImages[5].imageUrl,
+    thumbnails: [],
+    inStock: true,
+    specifications: {}
+  }
+];
 
 export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -103,21 +184,6 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Rating Filter */}
-            <div className="space-y-4">
-              <h3 className="font-bold uppercase text-xs tracking-wider text-muted-foreground">Rating</h3>
-              <div className="space-y-3">
-                {[4, 3, 2].map((r) => (
-                  <div key={r} className="flex items-center space-x-2">
-                    <Checkbox id={`rating-${r}`} />
-                    <label htmlFor={`rating-${r}`} className="text-sm font-medium flex items-center gap-1 cursor-pointer">
-                      {r}+ Stars
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </aside>
 
@@ -127,7 +193,7 @@ export default function ProductsPage() {
           <div className="bg-white dark:bg-card border border-border rounded-2xl p-4 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <p className="text-sm text-muted-foreground">
-                Showing <span className="font-bold text-foreground">1-12</span> of 120 results
+                Showing <span className="font-bold text-foreground">1-{staticProducts.length}</span> of {staticProducts.length} results
               </p>
               <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
                 <Button 
@@ -171,38 +237,16 @@ export default function ProductsPage() {
               Electronics
               <button className="hover:text-foreground">×</button>
             </Badge>
-            <Badge variant="secondary" className="bg-primary/10 text-primary rounded-full px-3 py-1 flex items-center gap-2 hover:bg-primary/20 transition-colors">
-              $100 - $500
-              <button className="hover:text-foreground">×</button>
-            </Badge>
           </div>
 
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-            {mockProducts.map((p) => (
+            {staticProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="mt-16 flex justify-center gap-2">
-            <Button variant="outline" className="rounded-xl" disabled>Previous</Button>
-            {[1, 2, 3, '...', 10].map((page, i) => (
-              <Button 
-                key={i} 
-                variant={page === 1 ? 'default' : 'outline'} 
-                className={`rounded-xl w-10 p-0 ${typeof page !== 'number' ? 'pointer-events-none border-none' : ''}`}
-              >
-                {page}
-              </Button>
-            ))}
-            <Button variant="outline" className="rounded-xl">Next</Button>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
-// Minimal icons for this file
-import Link from 'next/link';

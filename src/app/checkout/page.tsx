@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -35,8 +35,13 @@ const checkoutSchema = z.object({
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const { items, getTotalPrice, clearCart } = useCartStore();
   const total = getTotalPrice();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -58,8 +63,13 @@ export default function CheckoutPage() {
     router.push('/order-success');
   };
 
-  if (items.length === 0) {
-    router.push('/cart');
+  useEffect(() => {
+    if (mounted && items.length === 0) {
+      router.push('/cart');
+    }
+  }, [mounted, items, router]);
+
+  if (!mounted || items.length === 0) {
     return null;
   }
 
