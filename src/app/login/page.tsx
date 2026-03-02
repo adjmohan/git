@@ -8,6 +8,9 @@ import { useUser } from '@/firebase';
 import { ShieldCheck, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+/**
+ * Flipkart-style Login Page using Phone.Email for real-time OTP verification.
+ */
 export default function LoginPage() {
   const router = useRouter();
   const { user } = useUser();
@@ -28,8 +31,8 @@ export default function LoginPage() {
         {/* Left Side Branding */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Login</h1>
-            <p className="text-lg opacity-80">Get access to your Orders, Wishlist and Recommendations</p>
+            <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
+            <p className="text-lg opacity-80 text-white">Get access to your Orders, Wishlist and Recommendations</p>
           </div>
           <div className="hidden md:block">
              <img 
@@ -40,7 +43,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Side Form */}
+        {/* Right Side Form / Phone.Email Button */}
         <div className="p-10 flex-grow flex flex-col justify-center items-center text-center">
           <div className="mb-8 max-w-sm">
             <ShieldCheck className="w-12 h-12 text-green-600 mx-auto mb-4" />
@@ -61,7 +64,7 @@ export default function LoginPage() {
             <Info className="h-4 w-4 text-blue-600" />
             <AlertTitle className="text-xs font-bold">Safe & Verified</AlertTitle>
             <AlertDescription className="text-[10px] leading-relaxed">
-              We use encrypted verification. Your number is never shared with third parties without your consent.
+              We use encrypted verification. Your number is never shared with third parties without your consent. SMS is handled in real-time.
             </AlertDescription>
           </Alert>
 

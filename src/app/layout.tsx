@@ -33,6 +33,7 @@ export default function RootLayout({
           <Footer />
           <Toaster />
         </FirebaseClientProvider>
+        {/* Phone.Email integration script */}
         <Script src="https://www.phone.email/sign_in_button.js" strategy="afterInteractive" />
       </body>
     </html>
