@@ -1,0 +1,59 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "Tech Gadgets Banner",
+      "imageUrl": "https://picsum.photos/seed/tech1/1200/400",
+      "imageHint": "electronics technology"
+    },
+    {
+      "id": "hero-2",
+      "description": "Fashion Sale Banner",
+      "imageUrl": "https://picsum.photos/seed/fashion1/1200/400",
+      "imageHint": "fashion clothing"
+    },
+    {
+      "id": "cat-electronics",
+      "description": "Electronics Category",
+      "imageUrl": "https://picsum.photos/seed/elec/400/400",
+      "imageHint": "laptop phone"
+    },
+    {
+      "id": "cat-fashion",
+      "description": "Fashion Category",
+      "imageUrl": "https://picsum.photos/seed/fash/400/400",
+      "imageHint": "sneakers t-shirt"
+    },
+    {
+      "id": "cat-home",
+      "description": "Home Category",
+      "imageUrl": "https://picsum.photos/seed/home/400/400",
+      "imageHint": "furniture decor"
+    },
+    {
+      "id": "product-1",
+      "description": "Smartphone Ultra",
+      "imageUrl": "https://picsum.photos/seed/phone1/600/600",
+      "imageHint": "smartphone mobile"
+    },
+    {
+      "id": "product-2",
+      "description": "Wireless Headphones",
+      "imageUrl": "https://picsum.photos/seed/head/600/600",
+      "imageHint": "headphones audio"
+    },
+    {
+      "id": "product-3",
+      "description": "Smart Watch Series 7",
+      "imageUrl": "https://picsum.photos/seed/watch/600/600",
+      "imageHint": "smartwatch gadget"
+    },
+    {
+      "id": "product-4",
+      "description": "Premium Cotton T-Shirt",
+      "imageUrl": "https://picsum.photos/seed/shirt/600/600",
+      "imageHint": "t-shirt clothes"
+    }
+  ]
+}
