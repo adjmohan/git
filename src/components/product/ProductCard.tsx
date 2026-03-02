@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -40,23 +39,25 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </button>
 
       {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center">
+      <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center p-4">
         {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-            No Image
+          <div className="w-full h-full flex items-center justify-center bg-gray-50 text-muted-foreground text-xs">
+            No Image Available
           </div>
         )}
       </div>
 
       {/* Product Details */}
-      <div className="p-4 flex flex-col flex-grow text-left">
+      <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors min-h-[40px]">
           {product.name}
         </h3>
@@ -65,9 +66,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <RatingStars rating={product.rating} count={product.reviewCount} />
         </div>
 
-        <div className="mt-auto flex flex-col gap-2">
+        <div className="mt-auto flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-base font-bold text-foreground">
+            <span className="text-lg font-bold text-foreground">
               ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
@@ -85,7 +86,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <Button 
             variant="secondary" 
             size="sm" 
-            className="w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs font-bold h-9 border-none uppercase transition-colors"
+            className="w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs font-bold h-10 border-none uppercase transition-colors"
             onClick={handleAddToCart}
           >
             Add to Cart

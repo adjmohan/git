@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -15,7 +14,8 @@ import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'fi
 import { doc, getDoc } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { toast } from '@/hooks/use-toast';
-import { Smartphone, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Smartphone, ShieldCheck, ArrowRight, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const phoneSchema = z.object({
   phoneNumber: z.string().min(10, 'Enter a valid 10-digit mobile number').max(10, 'Enter a valid 10-digit mobile number'),
@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationId, setVerificationId] = useState<ConfirmationResult | null>(null);
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -40,15 +41,12 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  // Cleanup recaptcha on unmount
   useEffect(() => {
     return () => {
       if ((window as any).recaptchaVerifier) {
         try {
           (window as any).recaptchaVerifier.clear();
-        } catch (e) {
-          console.error("Error clearing recaptcha", e);
-        }
+        } catch (e) {}
         (window as any).recaptchaVerifier = null;
       }
     };
@@ -69,8 +67,8 @@ export default function LoginPage() {
       if (!(window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
-          callback: (response: any) => {
-            console.log("Recaptcha resolved");
+          callback: () => {
+            console.log("reCAPTCHA solved");
           },
           'expired-callback': () => {
             toast({ variant: "destructive", title: "Recaptcha Expired", description: "Please try again." });
@@ -82,12 +80,13 @@ export default function LoginPage() {
         });
       }
     } catch (err) {
-      console.error("Recaptcha setup error:", err);
+      console.error("reCAPTCHA setup error:", err);
     }
   };
 
   const onPhoneSubmit = async (values: z.infer<typeof phoneSchema>) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
       setupRecaptcha();
       const appVerifier = (window as any).recaptchaVerifier;
@@ -99,27 +98,25 @@ export default function LoginPage() {
       setStep('otp');
       toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
     } catch (error: any) {
-      console.error("Full Auth Error:", error);
-      
-      let message = "Failed to send OTP. Please try again.";
+      console.error("Auth Error:", error);
+      let message = "Failed to send OTP.";
       
       if (error.code === 'auth/operation-not-allowed') {
-        message = "Phone sign-in is not enabled in Firebase Console. Please enable it in the Authentication > Sign-in method tab.";
-      } else if (error.code === 'auth/invalid-phone-number') {
-        message = "The phone number is invalid.";
+        message = "Phone Authentication is not enabled in Firebase Console.";
+        setAuthError("Please go to Firebase Console > Authentication > Sign-in method and enable 'Phone'.");
+      } else if (error.code === 'auth/billing-not-enabled') {
+        message = "SMS Auth requires billing (Blaze plan) for this project.";
+        setAuthError("Use 'Test Phone Numbers' in Firebase Console to test for free.");
       } else if (error.code === 'auth/too-many-requests') {
-        message = "Too many attempts. Please try again later.";
-      } else if (error.message) {
-        message = error.message;
+        message = "Too many attempts. Try again later or use a Test Number.";
       }
       
       toast({
         variant: "destructive",
         title: "Error",
-        description: message,
+        description: error.message || message,
       });
 
-      // Reset recaptcha on error so it can be re-initialized
       if ((window as any).recaptchaVerifier) {
         try {
           (window as any).recaptchaVerifier.clear();
@@ -144,6 +141,7 @@ export default function LoginPage() {
       if (!userSnap.exists()) {
         setDocumentNonBlocking(userRef, {
           id: firebaseUser.uid,
+          email: firebaseUser.email || '',
           phoneNumber: firebaseUser.phoneNumber,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -153,7 +151,6 @@ export default function LoginPage() {
       toast({ title: "Welcome!", description: "Logged in successfully." });
       router.push('/');
     } catch (error: any) {
-      console.error("OTP Confirmation Error:", error);
       toast({
         variant: "destructive",
         title: "Verification Failed",
@@ -181,6 +178,16 @@ export default function LoginPage() {
 
         {/* Right Side Form */}
         <div className="p-10 flex-grow flex flex-col justify-center">
+          {authError && (
+            <Alert variant="destructive" className="mb-6">
+              <Info className="h-4 w-4" />
+              <AlertTitle>Configuration Required</AlertTitle>
+              <AlertDescription className="text-xs">
+                {authError}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {step === 'phone' ? (
             <Form {...phoneForm}>
               <form onSubmit={phoneForm.handleSubmit(onPhoneSubmit)} className="space-y-6">
@@ -189,14 +196,14 @@ export default function LoginPage() {
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500">Enter Mobile Number</FormLabel>
+                      <FormLabel className="text-xs font-bold text-gray-500 uppercase">Enter Mobile Number</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <span className="absolute left-0 bottom-2 text-sm font-bold text-gray-600">+91 | </span>
                           <Input 
                             placeholder="9999999999" 
                             {...field} 
-                            className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 pl-10 h-10 font-bold tracking-widest" 
+                            className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 pl-10 h-10 font-bold tracking-widest text-lg" 
                           />
                         </div>
                       </FormControl>
@@ -229,12 +236,12 @@ export default function LoginPage() {
                   name="otp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500">Enter 6-digit OTP</FormLabel>
+                      <FormLabel className="text-xs font-bold text-gray-500 uppercase">Enter 6-digit OTP</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="000000" 
                           {...field} 
-                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 h-12 font-bold tracking-[1em] text-center" 
+                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 h-12 font-bold tracking-[1em] text-center text-xl" 
                         />
                       </FormControl>
                       <FormMessage />
@@ -257,7 +264,7 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <div className="mt-10 text-center">
+          <div className="mt-10 text-center border-t pt-6">
              <Link href="/register" className="text-primary font-bold text-sm">
                 New to Flipkart? Create an account
              </Link>

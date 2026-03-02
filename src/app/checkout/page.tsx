@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -283,7 +282,6 @@ export default function CheckoutPage() {
                   {paymentMethod === 'upi' && (
                     <div className="space-y-4">
                       <div className="flex justify-center gap-6 mb-4">
-                         {/* UPI Icons Placeholder */}
                          <div className="flex flex-col items-center gap-1">
                             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border p-1 shadow-sm">
                                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="w-full h-full object-contain" />
@@ -316,14 +314,13 @@ export default function CheckoutPage() {
                           </FormItem>
                         )}
                       />
-                      <p className="text-[10px] text-muted-foreground text-center">A request will be sent to your UPI app for authorization.</p>
                     </div>
                   )}
 
                   {paymentMethod === 'cod' && (
                     <div className="text-center py-4">
                       <p className="font-medium">Cash / Card on Delivery</p>
-                      <p className="text-xs text-muted-foreground">You can pay using cash or via QR code on delivery.</p>
+                      <p className="text-xs text-muted-foreground">Pay conveniently when your order reaches your doorstep.</p>
                     </div>
                   )}
                 </div>
@@ -345,7 +342,11 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="relative w-16 h-16 bg-secondary rounded-xl overflow-hidden flex-shrink-0">
-                    <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
+                    {item.image ? (
+                      <Image src={item.image} alt={item.name} fill className="object-contain p-1" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground">N/A</div>
+                    )}
                   </div>
                   <div className="flex-grow">
                     <h4 className="text-sm font-bold line-clamp-1">{item.name}</h4>
@@ -378,14 +379,14 @@ export default function CheckoutPage() {
                 <ShieldCheck className="w-6 h-6 text-primary shrink-0" />
                 <div>
                   <h4 className="font-bold text-sm">Trusted & Secure</h4>
-                  <p className="text-xs text-muted-foreground">Every transaction is encrypted and verified for your protection.</p>
+                  <p className="text-xs text-muted-foreground">Encrypted transactions for your peace of mind.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
                 <div>
-                  <h4 className="font-bold text-sm">Satisfaction Guaranteed</h4>
-                  <p className="text-xs text-muted-foreground">30-day money-back guarantee if you're not happy with your purchase.</p>
+                  <h4 className="font-bold text-sm">Quality Guaranteed</h4>
+                  <p className="text-xs text-muted-foreground">100% original products with easy returns.</p>
                 </div>
               </div>
             </div>
