@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 
-// Stable mock data to avoid hydration mismatches from Math.random()
 const staticProducts: Product[] = [
   {
     id: 'p-0',
@@ -231,16 +230,8 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Active Filters Bar */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            <Badge variant="secondary" className="bg-primary/10 text-primary rounded-full px-3 py-1 flex items-center gap-2 hover:bg-primary/20 transition-colors">
-              Electronics
-              <button className="hover:text-foreground">×</button>
-            </Badge>
-          </div>
-
           {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {staticProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

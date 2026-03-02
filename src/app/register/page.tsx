@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,9 +10,11 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -23,6 +26,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { user } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -44,7 +48,21 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      await updateProfile(userCredential.user, { displayName: values.fullName });
+      const firebaseUser = userCredential.user;
+      
+      await updateProfile(firebaseUser, { displayName: values.fullName });
+      
+      // Save User Profile to Firestore (Non-blocking as per guidelines)
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      setDocumentNonBlocking(userRef, {
+        id: firebaseUser.uid,
+        email: values.email,
+        firstName: values.fullName.split(' ')[0] || '',
+        lastName: values.fullName.split(' ').slice(1).join(' ') || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+
       toast({ title: "Welcome!", description: "Account created successfully." });
       router.push('/');
     } catch (error: any) {

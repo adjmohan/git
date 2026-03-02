@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -63,14 +63,25 @@ export default function CheckoutPage() {
     router.push('/order-success');
   };
 
-  useEffect(() => {
-    if (mounted && items.length === 0) {
-      router.push('/cart');
-    }
-  }, [mounted, items, router]);
-
-  if (!mounted || items.length === 0) {
+  if (!mounted) {
     return null;
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center flex flex-col items-center gap-6">
+        <div className="w-24 h-24 bg-secondary rounded-full flex items-center justify-center mb-4">
+          <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+        </div>
+        <h1 className="font-headline font-bold text-3xl">Your cart is empty</h1>
+        <p className="text-muted-foreground">Add items to your cart before proceeding to checkout.</p>
+        <Link href="/products">
+          <Button size="lg" className="rounded-full px-8 h-12">
+            Continue Shopping
+          </Button>
+        </Link>
+      </div>
+    );
   }
 
   return (

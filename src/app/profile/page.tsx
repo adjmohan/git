@@ -1,14 +1,18 @@
+
 "use client";
 
 import React from 'react';
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { User, Package, Heart, CreditCard, Power, ChevronRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
+import { toast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const router = useRouter();
 
   if (isUserLoading) {
@@ -19,6 +23,16 @@ export default function ProfilePage() {
     router.push('/login');
     return null;
   }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({ title: "Logged out", description: "You have been successfully logged out." });
+      router.push('/');
+    } catch (error) {
+      console.error("Logout error", error);
+    }
+  };
 
   const menuItems = [
     { icon: Package, title: "My Orders", subtitle: "Check your order status", href: "/orders" },
@@ -71,7 +85,10 @@ export default function ProfilePage() {
             </div>
 
             <div className="bg-white rounded shadow-sm overflow-hidden">
-               <button className="w-full p-4 flex items-center gap-3 font-bold text-gray-600 hover:text-primary transition-colors">
+               <button 
+                onClick={handleLogout}
+                className="w-full p-4 flex items-center gap-3 font-bold text-gray-600 hover:text-primary transition-colors"
+               >
                   <Power className="w-5 h-5" />
                   Logout
                </button>
