@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag, Smartphone, Wallet, CheckCircle } from 'lucide-react';
+import { CreditCard, ChevronLeft, ShieldCheck, ShoppingBag, Smartphone, Wallet, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,10 +32,7 @@ const checkoutSchema = z.object({
   city: z.string().min(2, 'City is required'),
   zip: z.string().min(5, 'Valid ZIP code required'),
   paymentMethod: z.enum(['card', 'upi', 'cod']),
-  upiId: z.string().optional(),
   cardNumber: z.string().optional(),
-  expiry: z.string().optional(),
-  cvv: z.string().optional(),
 });
 
 export default function CheckoutPage() {
@@ -45,7 +42,8 @@ export default function CheckoutPage() {
   const total = getTotalPrice();
 
   // Owner Merchant Details
-  const merchantUpi = "adjmohan@oksbi";
+  const MERCHANT_UPI = "adjmohan@oksbi";
+  const MERCHANT_NAME = "Flipkart Clone Store";
 
   useEffect(() => {
     setMounted(true);
@@ -59,23 +57,40 @@ export default function CheckoutPage() {
       address: '',
       city: '',
       zip: '',
-      paymentMethod: 'card',
+      paymentMethod: 'upi',
     },
   });
 
   const paymentMethod = form.watch('paymentMethod');
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-    console.log('Order submitted to merchant:', merchantUpi, values);
-    
+    if (values.paymentMethod === 'upi') {
+      // Construct UPI Deep Link for One-Click Payment
+      // pa: payee address, pn: payee name, am: amount, cu: currency, tn: transaction note
+      const upiUrl = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${total}&cu=INR&tn=${encodeURIComponent('Order Payment')}`;
+      
+      toast({
+        title: "Opening Payment App",
+        description: "Redirecting you to complete the payment via GPay/PhonePe...",
+      });
+
+      // Try to open the UPI app intent
+      window.location.href = upiUrl;
+
+      // Simulate completion after a delay (since we can't track cross-app success in web only)
+      setTimeout(() => {
+        clearCart();
+        router.push('/order-success');
+      }, 3000);
+      return;
+    }
+
+    // Handle other methods
     toast({
       title: "Processing Payment",
-      description: values.paymentMethod === 'upi' 
-        ? `Requesting payment to ${merchantUpi}...` 
-        : "Verifying transaction with your bank...",
+      description: "Verifying transaction with your bank...",
     });
 
-    // Simulate short processing time
     setTimeout(() => {
       clearCart();
       router.push('/order-success');
@@ -108,8 +123,8 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         <div className="space-y-10">
           <div>
-            <h1 className="font-headline font-bold text-4xl mb-2 text-primary">Checkout</h1>
-            <p className="text-muted-foreground">Complete your purchase by providing shipping and payment info.</p>
+            <h1 className="font-headline font-bold text-4xl mb-2 text-primary uppercase tracking-tight italic">Checkout</h1>
+            <p className="text-muted-foreground font-medium">Safe & Secure Payments Powered by Flipkart.</p>
           </div>
 
           <Form {...form}>
@@ -117,7 +132,7 @@ export default function CheckoutPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-xl font-headline font-bold">
                   <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">1</div>
-                  Shipping Details
+                  Delivery Address
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
@@ -125,8 +140,8 @@ export default function CheckoutPage() {
                     name="fullName"
                     render={({ field }) => (
                       <FormItem className="sm:col-span-2">
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl><Input placeholder="John Doe" {...field} className="rounded-xl h-12" /></FormControl>
+                        <FormLabel className="text-xs font-bold uppercase text-gray-400">Full Name</FormLabel>
+                        <FormControl><Input placeholder="Name" {...field} className="rounded-sm h-12 border-gray-200" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -136,8 +151,8 @@ export default function CheckoutPage() {
                     name="address"
                     render={({ field }) => (
                       <FormItem className="sm:col-span-2">
-                        <FormLabel>Street Address</FormLabel>
-                        <FormControl><Input placeholder="123 Shopping Lane" {...field} className="rounded-xl h-12" /></FormControl>
+                        <FormLabel className="text-xs font-bold uppercase text-gray-400">Street Address</FormLabel>
+                        <FormControl><Input placeholder="Address" {...field} className="rounded-sm h-12 border-gray-200" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -147,8 +162,8 @@ export default function CheckoutPage() {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl><Input placeholder="Mumbai" {...field} className="rounded-xl h-12" /></FormControl>
+                        <FormLabel className="text-xs font-bold uppercase text-gray-400">City</FormLabel>
+                        <FormControl><Input placeholder="City" {...field} className="rounded-sm h-12 border-gray-200" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -158,8 +173,8 @@ export default function CheckoutPage() {
                     name="zip"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>ZIP Code</FormLabel>
-                        <FormControl><Input placeholder="400001" {...field} className="rounded-xl h-12" /></FormControl>
+                        <FormLabel className="text-xs font-bold uppercase text-gray-400">Pincode</FormLabel>
+                        <FormControl><Input placeholder="6-digit PIN" {...field} className="rounded-sm h-12 border-gray-200" /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -170,7 +185,7 @@ export default function CheckoutPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-xl font-headline font-bold">
                   <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">2</div>
-                  Payment Method
+                  Select Payment Method
                 </div>
 
                 <FormField
@@ -180,35 +195,36 @@ export default function CheckoutPage() {
                     <FormItem className="space-y-3">
                       <FormControl>
                         <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-3">
-                          <div className={cn("flex items-center space-x-3 border p-4 rounded-xl cursor-pointer", field.value === 'card' ? 'bg-primary/5 border-primary' : 'bg-white')}>
-                            <RadioGroupItem value="card" id="card" />
-                            <FormLabel htmlFor="card" className="flex flex-1 items-center gap-3 cursor-pointer">
-                              <CreditCard className="w-5 h-5 text-primary" />
-                              <div className="flex-1">
-                                <p className="font-bold">Credit / Debit Card</p>
-                                <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay</p>
-                              </div>
-                            </FormLabel>
-                          </div>
-
-                          <div className={cn("flex items-center space-x-3 border p-4 rounded-xl cursor-pointer", field.value === 'upi' ? 'bg-primary/5 border-primary' : 'bg-white')}>
-                            <RadioGroupItem value="upi" id="upi" />
+                          <div className={cn("flex items-center space-x-3 border p-4 rounded-sm cursor-pointer transition-all", field.value === 'upi' ? 'bg-primary/5 border-primary shadow-sm' : 'bg-white')}>
+                            <RadioGroupItem value="upi" id="upi" className="border-primary" />
                             <FormLabel htmlFor="upi" className="flex flex-1 items-center gap-3 cursor-pointer">
                               <Smartphone className="w-5 h-5 text-primary" />
                               <div className="flex-1">
-                                <p className="font-bold">UPI Payments</p>
-                                <p className="text-xs text-muted-foreground">GPay, PhonePe, Paytm</p>
+                                <p className="font-bold text-gray-800">PhonePe / Google Pay / UPI</p>
+                                <p className="text-xs text-muted-foreground">One-click instant secure payment</p>
+                              </div>
+                              <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/upi-4e311a.svg" alt="UPI" className="h-4" />
+                            </FormLabel>
+                          </div>
+
+                          <div className={cn("flex items-center space-x-3 border p-4 rounded-sm cursor-pointer transition-all", field.value === 'card' ? 'bg-primary/5 border-primary shadow-sm' : 'bg-white')}>
+                            <RadioGroupItem value="card" id="card" className="border-primary" />
+                            <FormLabel htmlFor="card" className="flex flex-1 items-center gap-3 cursor-pointer">
+                              <CreditCard className="w-5 h-5 text-primary" />
+                              <div className="flex-1">
+                                <p className="font-bold text-gray-800">Credit / Debit Card</p>
+                                <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay, Maestro</p>
                               </div>
                             </FormLabel>
                           </div>
 
-                          <div className={cn("flex items-center space-x-3 border p-4 rounded-xl cursor-pointer", field.value === 'cod' ? 'bg-primary/5 border-primary' : 'bg-white')}>
-                            <RadioGroupItem value="cod" id="cod" />
+                          <div className={cn("flex items-center space-x-3 border p-4 rounded-sm cursor-pointer transition-all", field.value === 'cod' ? 'bg-primary/5 border-primary shadow-sm' : 'bg-white')}>
+                            <RadioGroupItem value="cod" id="cod" className="border-primary" />
                             <FormLabel htmlFor="cod" className="flex flex-1 items-center gap-3 cursor-pointer">
                               <Wallet className="w-5 h-5 text-primary" />
                               <div className="flex-1">
-                                <p className="font-bold">Cash on Delivery</p>
-                                <p className="text-xs text-muted-foreground">Pay when you receive the items</p>
+                                <p className="font-bold text-gray-800">Cash on Delivery</p>
+                                <p className="text-xs text-muted-foreground">Pay when you receive the order</p>
                               </div>
                             </FormLabel>
                           </div>
@@ -218,54 +234,42 @@ export default function CheckoutPage() {
                   )}
                 />
 
-                <div className="bg-secondary/30 p-6 rounded-2xl border border-dashed border-border">
-                  {paymentMethod === 'card' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="cardNumber"
-                        render={({ field }) => (
-                          <FormItem className="sm:col-span-2">
-                            <FormLabel>Card Number</FormLabel>
-                            <FormControl><Input placeholder="0000 0000 0000 0000" {...field} className="rounded-xl h-11" /></FormControl>
-                          </FormItem>
-                        )}
-                      />
+                <div className="bg-secondary/30 p-6 rounded shadow-inner border border-border">
+                  {paymentMethod === 'upi' && (
+                    <div className="text-center space-y-4">
+                      <div className="flex items-center justify-center gap-3 py-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-6" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="h-6" />
+                      </div>
+                      <p className="text-sm font-medium text-gray-600">Clicking Pay will open your UPI app to complete the transaction securely.</p>
+                      <div className="bg-primary/5 p-3 rounded-sm border border-primary/10 inline-block">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Verified Merchant</p>
+                        <p className="text-xs font-mono font-bold text-gray-700">{MERCHANT_UPI}</p>
+                      </div>
                     </div>
                   )}
 
-                  {paymentMethod === 'upi' && (
+                  {paymentMethod === 'card' && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/20">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <div>
-                            <p className="text-xs font-bold text-primary uppercase">Official Merchant</p>
-                            <p className="font-mono text-sm font-bold">{merchantUpi}</p>
-                          </div>
-                        </div>
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="h-4" />
+                      <Input placeholder="Card Number" className="rounded-sm h-11" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input placeholder="MM/YY" className="rounded-sm h-11" />
+                        <Input placeholder="CVV" className="rounded-sm h-11" />
                       </div>
-                      <FormField
-                        control={form.control}
-                        name="upiId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Your UPI ID (e.g., username@bank)</FormLabel>
-                            <FormControl><Input placeholder="Enter your UPI ID to pay" {...field} className="rounded-xl h-11" /></FormControl>
-                          </FormItem>
-                        )}
-                      />
                     </div>
                   )}
 
                   {paymentMethod === 'cod' && (
-                    <p className="text-center text-sm font-medium text-muted-foreground py-4">Safe and secure delivery. Pay on arrival.</p>
+                    <div className="text-center py-4 space-y-2">
+                      <CheckCircle className="w-10 h-10 text-green-600 mx-auto" />
+                      <p className="text-sm font-bold text-gray-700 uppercase">Pay on Delivery Available</p>
+                      <p className="text-xs text-muted-foreground">Please keep exact change ready at delivery.</p>
+                    </div>
                   )}
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full h-16 rounded-2xl text-xl font-bold shadow-xl shadow-primary/20 uppercase">
+              <Button type="submit" size="lg" className="w-full h-14 rounded-sm text-lg font-bold shadow-lg shadow-primary/20 uppercase tracking-wider">
                 Pay ₹{total.toLocaleString()}
               </Button>
             </form>
@@ -273,36 +277,41 @@ export default function CheckoutPage() {
         </div>
 
         <div className="lg:pl-8">
-          <div className="bg-white border border-border rounded-[2rem] p-8 sticky top-24 space-y-6">
-            <h2 className="font-headline font-bold text-2xl">Order Summary</h2>
-            <div className="space-y-4 max-h-[300px] overflow-auto pr-2">
+          <div className="bg-white border border-gray-200 rounded shadow-sm p-6 sticky top-24 space-y-6">
+            <h2 className="font-headline font-bold text-xl uppercase tracking-tighter italic border-b pb-3">Price Details</h2>
+            <div className="space-y-4 max-h-[300px] overflow-auto pr-2 scrollbar-hide">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
-                  <div className="relative w-14 h-14 bg-secondary rounded-lg overflow-hidden flex-shrink-0 p-1">
+                  <div className="relative w-12 h-12 bg-secondary rounded-sm overflow-hidden flex-shrink-0 p-1">
                     <Image src={item.image} alt={item.name} fill className="object-contain" />
                   </div>
                   <div className="flex-grow">
-                    <h4 className="text-xs font-bold line-clamp-1">{item.name}</h4>
-                    <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
+                    <h4 className="text-xs font-bold line-clamp-1 text-gray-800">{item.name}</h4>
+                    <p className="text-[10px] text-muted-foreground">Seller: SuperComNet • Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-bold text-xs">₹{(item.price * item.quantity).toLocaleString()}</span>
+                  <span className="font-bold text-sm">₹{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
             </div>
             <Separator />
             <div className="space-y-3">
-              <div className="flex justify-between text-muted-foreground text-sm">
-                <span>Total Items</span>
-                <span>{items.length}</span>
+              <div className="flex justify-between text-gray-600 text-sm">
+                <span>Price ({items.length} items)</span>
+                <span>₹{total.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-2xl font-bold text-primary pt-2">
-                <span>Grand Total</span>
+              <div className="flex justify-between text-gray-600 text-sm">
+                <span>Delivery Charges</span>
+                <span className="text-green-600 font-bold">FREE</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-xl font-bold text-gray-900 pt-2">
+                <span>Total Amount</span>
                 <span>₹{total.toLocaleString()}</span>
               </div>
             </div>
-            <div className="bg-primary/5 p-4 rounded-xl flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
-              <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">Payments are secured. Verified merchant ID: {merchantUpi}.</p>
+            <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products.</p>
             </div>
           </div>
         </div>

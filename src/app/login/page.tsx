@@ -15,7 +15,7 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -100,12 +100,12 @@ export default function LoginPage() {
       toast({ title: "OTP Sent", description: `Verification code sent to +91 ${values.phoneNumber}` });
     } catch (error: any) {
       console.error("Phone login error:", error);
-      let message = "Failed to send OTP. Please check your connection.";
+      let message = "Failed to send OTP. Please try again.";
       
       if (error.code === 'auth/operation-not-allowed') {
         message = "Phone auth is not enabled in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
-        message = "Too many attempts. Please try again later or use a 'Test Number' in Firebase Console.";
+        message = "Rate limit exceeded. Use a 'Test Number' in Firebase Console.";
       }
       
       toast({
@@ -114,7 +114,7 @@ export default function LoginPage() {
         description: message,
       });
 
-      // Clear recaptcha on error to allow retry
+      // Reset recaptcha on error
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.clear();
         (window as any).recaptchaVerifier = null;
@@ -147,7 +147,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Invalid OTP",
-        description: "The code you entered is incorrect. Please try again.",
+        description: "The code you entered is incorrect.",
       });
     } finally {
       setIsLoading(false);
@@ -163,8 +163,8 @@ export default function LoginPage() {
         {/* Left Side Branding */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
-            <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
-            <p className="text-lg opacity-80 text-white">Get access to your Orders, Wishlist and Recommendations</p>
+            <h1 className="text-3xl font-bold mb-4 text-white uppercase italic tracking-tighter">Login</h1>
+            <p className="text-lg opacity-80 text-white font-medium">Get access to your Orders, Wishlist and Recommendations</p>
           </div>
           <div className="hidden md:block">
              <img 
@@ -181,7 +181,7 @@ export default function LoginPage() {
             <h2 className="text-xl font-bold text-gray-800 mb-2">
               {step === 'phone' ? 'Mobile Login' : 'Verify OTP'}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 font-medium">
               {step === 'phone' 
                 ? 'Enter your mobile number to get started.' 
                 : `We've sent a 6-digit code to +91 ${phoneForm.getValues('phoneNumber')}`}
@@ -196,14 +196,14 @@ export default function LoginPage() {
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500">Mobile Number</FormLabel>
+                      <FormLabel className="text-xs font-bold text-gray-400 uppercase tracking-widest">Mobile Number</FormLabel>
                       <div className="flex items-center border-b-2 border-gray-200 focus-within:border-primary transition-all">
                         <span className="text-gray-500 font-bold px-3">+91</span>
                         <FormControl>
                           <Input 
                             placeholder="Enter 10-digit number" 
                             {...field} 
-                            className="border-none focus-visible:ring-0 rounded-none h-12 text-lg font-medium p-0" 
+                            className="border-none focus-visible:ring-0 rounded-none h-12 text-lg font-bold p-0 text-gray-800" 
                           />
                         </FormControl>
                       </div>
@@ -213,13 +213,13 @@ export default function LoginPage() {
                 />
                 
                 <div className="space-y-4 pt-4">
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-gray-400 font-medium">
                     By continuing, you agree to Flipkart's <span className="text-primary font-bold cursor-pointer">Terms of Use</span> and <span className="text-primary font-bold cursor-pointer">Privacy Policy</span>.
                   </p>
                   <Button 
                     type="submit" 
                     disabled={isLoading} 
-                    className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm uppercase text-sm shadow-md"
+                    className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm uppercase text-sm shadow-md tracking-wider"
                   >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Request OTP'}
                   </Button>
@@ -229,41 +229,43 @@ export default function LoginPage() {
           ) : (
             <Form {...otpForm}>
               <form onSubmit={otpForm.handleSubmit(onOtpSubmit)} className="space-y-8">
-                <FormField
-                  control={otpForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col items-center space-y-6">
-                      <FormLabel className="text-xs font-bold text-gray-500 self-start">Enter 6-digit OTP</FormLabel>
-                      <FormControl>
-                        <InputOTP
-                          maxLength={6}
-                          value={field.value}
-                          onChange={field.onChange}
-                          className="gap-2"
-                        >
-                          <InputOTPGroup>
-                            <InputOTPSlot index={0} />
-                            <InputOTPSlot index={1} />
-                            <InputOTPSlot index={2} />
-                          </InputOTPGroup>
-                          <InputOTPSeparator />
-                          <InputOTPGroup>
-                            <InputOTPSlot index={3} />
-                            <InputOTPSlot index={4} />
-                            <InputOTPSlot index={5} />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="flex flex-col items-center space-y-6">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest self-start">Enter 6-digit OTP</p>
+                  <FormField
+                    control={otpForm.control}
+                    name="otp"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <InputOTP
+                            maxLength={6}
+                            value={field.value}
+                            onChange={field.onChange}
+                            className="gap-2"
+                          >
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                              <InputOTPSlot index={1} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                              <InputOTPSlot index={2} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                            </InputOTPGroup>
+                            <InputOTPSeparator />
+                            <InputOTPGroup>
+                              <InputOTPSlot index={3} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                              <InputOTPSlot index={4} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                              <InputOTPSlot index={5} className="border-2 rounded-sm h-14 w-12 font-bold text-xl" />
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <div className="space-y-4 pt-2">
                   <Button 
                     type="submit" 
                     disabled={isLoading} 
-                    className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm uppercase text-sm shadow-md"
+                    className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-sm uppercase text-sm shadow-md tracking-wider"
                   >
                     {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Verify & Continue'}
                   </Button>
@@ -282,17 +284,17 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <div className="mt-10 space-y-4">
+          <div className="mt-8">
              <Alert className="bg-green-50 border-green-100">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-xs font-bold text-green-800">Blaze Plan Enabled</AlertTitle>
-                <AlertDescription className="text-[10px] text-green-700">
-                  Real SMS is active. For faster testing and to avoid "Too Many Requests", add your number as a "Test Number" in Firebase Console.
+                <AlertTitle className="text-xs font-bold text-green-800 uppercase tracking-tight">Blaze Plan Enabled</AlertTitle>
+                <AlertDescription className="text-[10px] text-green-700 font-medium">
+                  Real SMS active. Use "Test Numbers" in Firebase Console for free instant verification during development.
                 </AlertDescription>
              </Alert>
           </div>
 
-          <div className="mt-12 text-center border-t pt-6 w-full">
+          <div className="mt-10 text-center border-t pt-6 w-full">
              <Link href="/register" className="text-primary font-bold text-sm hover:underline">
                 New to Flipkart? Create an account
              </Link>
