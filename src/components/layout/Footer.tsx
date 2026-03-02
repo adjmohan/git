@@ -1,83 +1,94 @@
-
 import React from 'react';
 import Link from 'next/link';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Facebook, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 export const Footer = () => {
   return (
-    <footer className="bg-white dark:bg-card border-t border-border mt-20">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand Column */}
-          <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
+    <footer className="bg-[#172337] text-white pt-10 pb-10">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 text-xs">
+          <div className="space-y-3">
+            <h4 className="text-gray-400 font-medium uppercase">About</h4>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:underline">Contact Us</Link></li>
+              <li><Link href="#" className="hover:underline">About Us</Link></li>
+              <li><Link href="#" className="hover:underline">Careers</Link></li>
+              <li><Link href="#" className="hover:underline">Flipkart Stories</Link></li>
+              <li><Link href="#" className="hover:underline">Press</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-gray-400 font-medium uppercase">Help</h4>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:underline">Payments</Link></li>
+              <li><Link href="#" className="hover:underline">Shipping</Link></li>
+              <li><Link href="#" className="hover:underline">Cancellation & Returns</Link></li>
+              <li><Link href="#" className="hover:underline">FAQ</Link></li>
+              <li><Link href="#" className="hover:underline">Report Infringement</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-gray-400 font-medium uppercase">Policy</h4>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:underline">Return Policy</Link></li>
+              <li><Link href="#" className="hover:underline">Terms Of Use</Link></li>
+              <li><Link href="#" className="hover:underline">Security</Link></li>
+              <li><Link href="#" className="hover:underline">Privacy</Link></li>
+              <li><Link href="#" className="hover:underline">Sitemap</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-gray-400 font-medium uppercase">Social</h4>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:underline">Facebook</Link></li>
+              <li><Link href="#" className="hover:underline">Twitter</Link></li>
+              <li><Link href="#" className="hover:underline">YouTube</Link></li>
+            </ul>
+          </div>
+
+          <div className="md:col-span-2 border-l border-gray-600 pl-8 hidden lg:block">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <h4 className="text-gray-400 font-medium uppercase">Mail Us:</h4>
+                <p className="text-gray-300">
+                  Flipkart Internet Private Limited,<br />
+                  Buildings Alyssa, Begonia &<br />
+                  Clove Embassy Tech Village,<br />
+                  Outer Ring Road, Devarabeesanahalli Village,<br />
+                  Bengaluru, 560103,<br />
+                  Karnataka, India
+                </p>
               </div>
-              <span className="font-headline font-bold text-xl tracking-tight">
-                Commerce<span className="text-primary">Stream</span>
-              </span>
-            </Link>
-            <p className="text-muted-foreground leading-relaxed">
-              Your one-stop destination for premium products. Experience seamless shopping with fast delivery and world-class support.
-            </p>
-            <div className="flex gap-4">
-              <Button variant="secondary" size="icon" className="rounded-full hover:bg-primary hover:text-white transition-all">
-                <Facebook className="w-4 h-4" />
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full hover:bg-primary hover:text-white transition-all">
-                <Twitter className="w-4 h-4" />
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full hover:bg-primary hover:text-white transition-all">
-                <Instagram className="w-4 h-4" />
-              </Button>
-              <Button variant="secondary" size="icon" className="rounded-full hover:bg-primary hover:text-white transition-all">
-                <Youtube className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-headline font-bold text-lg mb-6">Quick Links</h4>
-            <ul className="space-y-4">
-              <li><Link href="/products" className="text-muted-foreground hover:text-primary transition-colors">All Products</Link></li>
-              <li><Link href="/categories" className="text-muted-foreground hover:text-primary transition-colors">Categories</Link></li>
-              <li><Link href="/deals" className="text-muted-foreground hover:text-primary transition-colors">Daily Deals</Link></li>
-              <li><Link href="/new-arrivals" className="text-muted-foreground hover:text-primary transition-colors">New Arrivals</Link></li>
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          <div>
-            <h4 className="font-headline font-bold text-lg mb-6">Customer Care</h4>
-            <ul className="space-y-4">
-              <li><Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">My Account</Link></li>
-              <li><Link href="/cart" className="text-muted-foreground hover:text-primary transition-colors">Track Orders</Link></li>
-              <li><Link href="/help" className="text-muted-foreground hover:text-primary transition-colors">Help Center</Link></li>
-              <li><Link href="/returns" className="text-muted-foreground hover:text-primary transition-colors">Returns & Refunds</Link></li>
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-headline font-bold text-lg mb-6">Join Our Stream</h4>
-            <p className="text-muted-foreground mb-6">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
-            <div className="flex gap-2">
-              <Input placeholder="Enter your email" className="bg-secondary border-none" />
-              <Button>Join</Button>
+              <div className="space-y-2">
+                <h4 className="text-gray-400 font-medium uppercase">Registered Office Address:</h4>
+                <p className="text-gray-300">
+                  Flipkart Internet Private Limited,<br />
+                  Buildings Alyssa, Begonia &<br />
+                  Clove Embassy Tech Village,<br />
+                  Outer Ring Road, Devarabeesanahalli Village,<br />
+                  Bengaluru, 560103,<br />
+                  Karnataka, India<br />
+                  CIN : U51109KA2012PTC066107<br />
+                  Telephone: 044-45614700
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© 2024 CommerceStream Inc. All rights reserved.</p>
-          <div className="flex gap-8">
-            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-            <Link href="/cookies" className="hover:text-primary transition-colors">Cookies</Link>
+        <div className="mt-10 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+          <div className="flex flex-wrap justify-center gap-6">
+            <span className="flex items-center gap-1 text-accent"><MapPin className="w-3 h-3" /> Become a Seller</span>
+            <span className="flex items-center gap-1 text-accent"><Twitter className="w-3 h-3" /> Advertise</span>
+            <span className="flex items-center gap-1 text-accent"><Facebook className="w-3 h-3" /> Gift Cards</span>
+            <span className="flex items-center gap-1 text-accent"><Mail className="w-3 h-3" /> Help Center</span>
+          </div>
+          <p className="text-gray-400">© 2007-2024 Flipkart.com</p>
+          <div className="flex gap-4">
+            <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/payment-method-c454fb.svg" alt="Payment methods" className="h-4" />
           </div>
         </div>
       </div>

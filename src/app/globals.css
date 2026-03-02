@@ -1,35 +1,29 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 225 45% 97.5%;
+    --background: 210 20% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 222 87% 58%;
+    --primary: 217 89% 55%; /* Flipkart Blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 47% 95%;
-    --secondary-foreground: 222 87% 20%;
-    --muted: 222 47% 92%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 20% 92%;
     --muted-foreground: 215 16% 47%;
-    --accent: 196 89% 52%;
+    --accent: 38 100% 50%; /* Flipkart Yellow/Orange */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 222 87% 58%;
-    --radius: 0.75rem;
-    --chart-1: 222 87% 58%;
-    --chart-2: 196 89% 52%;
-    --chart-3: 160 60% 45%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --ring: 217 89% 55%;
+    --radius: 0.5rem;
   }
 
   .dark {
@@ -39,19 +33,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 13%;
     --popover-foreground: 210 40% 98%;
-    --primary: 222 87% 58%;
+    --primary: 217 89% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 222 47% 18%;
     --secondary-foreground: 210 40% 98%;
     --muted: 222 47% 18%;
     --muted-foreground: 215 20% 65%;
-    --accent: 196 89% 52%;
+    --accent: 38 100% 50%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
     --border: 222 47% 18%;
     --input: 222 47% 18%;
-    --ring: 222 87% 58%;
+    --ring: 217 89% 60%;
   }
 }
 

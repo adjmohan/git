@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -78,172 +77,113 @@ const featuredProducts: Product[] = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-12 pb-20">
-      {/* Hero Section */}
-      <section className="relative w-full h-[500px] md:h-[600px] overflow-hidden bg-primary/5">
-        <div className="container mx-auto px-4 h-full flex flex-col md:flex-row items-center justify-between py-12 gap-8">
-          <div className="flex-1 space-y-6 text-center md:text-left animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold text-sm tracking-wide uppercase">
-              <Zap className="w-4 h-4" />
-              Limited Time Summer Offer
-            </div>
-            <h1 className="font-headline font-bold text-5xl md:text-7xl leading-tight">
-              Elegance in <br /> Every <span className="text-primary">Stream</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-lg">
-              Discover a curated selection of the finest products crafted just for you. Quality meets convenience at your fingertips.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
-              <Link href="/products">
-                <Button size="lg" className="rounded-full px-8 h-14 text-lg font-bold shadow-xl shadow-primary/25">
+    <div className="flex flex-col gap-8 pb-20 bg-gray-100">
+      {/* Hero Banner Section */}
+      <section className="relative w-full h-[300px] overflow-hidden">
+        <Image
+          src={PlaceHolderImages.find(img => img.id === 'hero-1')?.imageUrl || ''}
+          alt="Flipkart Sale"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/10 flex items-center px-10">
+          <div className="max-w-lg text-white space-y-4">
+             <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg">Big Billion Days</h1>
+             <p className="text-xl drop-shadow-md">Biggest Offers of the Year!</p>
+             <Link href="/products">
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold rounded-sm px-8">
                   Shop Now
-                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-              </Link>
-              <Link href="/deals">
-                <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-lg font-bold">
-                  View Deals
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <div className="flex-1 relative w-full h-64 md:h-full animate-fade-in delay-150">
-            <Image
-              src={PlaceHolderImages.find(img => img.id === 'hero-1')?.imageUrl || ''}
-              alt="Hero Banner"
-              fill
-              className="object-contain"
-              priority
-              data-ai-hint="tech banner"
-            />
+             </Link>
           </div>
         </div>
-        {/* Abstract Background Shapes */}
-        <div className="absolute top-1/4 -right-20 w-80 h-80 bg-primary/10 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-1/4 -left-20 w-60 h-60 bg-accent/10 rounded-full blur-3xl -z-10" />
       </section>
 
-      {/* Category Grid */}
-      <section className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-headline font-bold text-3xl">Shop by Category</h2>
-          <Link href="/categories" className="text-primary font-bold flex items-center gap-1 hover:underline">
-            View All <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+      {/* Category Icons Bar */}
+      <section className="bg-white py-4 shadow-sm overflow-x-auto whitespace-nowrap">
+        <div className="container mx-auto px-4 flex justify-between gap-8 min-w-max">
           {categories.map((cat) => (
-            <Link key={cat.id} href={`/products?category=${cat.slug}`} className="group flex flex-col items-center gap-4 text-center">
-              <div className="relative w-full aspect-square bg-secondary rounded-3xl overflow-hidden group-hover:scale-105 transition-all duration-300 ring-primary/0 group-hover:ring-4 ring-offset-4">
+            <Link key={cat.id} href={`/products?category=${cat.slug}`} className="flex flex-col items-center gap-2 group">
+              <div className="relative w-16 h-16 rounded-full overflow-hidden transition-transform group-hover:scale-110">
                 <Image
                   src={cat.image}
                   alt={cat.name}
                   fill
-                  className="object-cover p-4"
-                  data-ai-hint={cat.name}
+                  className="object-cover"
                 />
               </div>
-              <span className="font-bold text-lg">{cat.name}</span>
+              <span className="text-sm font-bold text-gray-700">{cat.name}</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Features Bar */}
-      <section className="container mx-auto px-4">
-        <div className="bg-white dark:bg-card border border-border p-8 rounded-[2rem] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-blue-50 text-primary rounded-2xl flex items-center justify-center">
-              <Truck className="w-7 h-7" />
-            </div>
-            <div>
-              <h4 className="font-bold text-lg">Fast Delivery</h4>
-              <p className="text-sm text-muted-foreground">Free for orders over $150</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center">
-              <ShieldCheck className="w-7 h-7" />
-            </div>
-            <div>
-              <h4 className="font-bold text-lg">Secure Payments</h4>
-              <p className="text-sm text-muted-foreground">100% encryption guaranteed</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center">
-              <RotateCcw className="w-7 h-7" />
-            </div>
-            <div>
-              <h4 className="font-bold text-lg">Easy Returns</h4>
-              <p className="text-sm text-muted-foreground">30-day hassle free policy</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
-              <Phone className="w-7 h-7" />
-            </div>
-            <div>
-              <h4 className="font-bold text-lg">24/7 Support</h4>
-              <p className="text-sm text-muted-foreground">Expert help anytime</p>
+      {/* Main Grid Section */}
+      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Left Sidebar Ad */}
+        <div className="hidden md:block bg-white p-4 rounded shadow-sm h-fit space-y-4">
+          <h3 className="font-bold border-b pb-2">Deals of the Day</h3>
+          <div className="space-y-4">
+            <div className="text-center group cursor-pointer">
+              <div className="relative aspect-square mb-2 overflow-hidden">
+                 <Image src={featuredProducts[0].image} alt="deal" fill className="object-contain group-hover:scale-105 transition-transform" />
+              </div>
+              <p className="text-sm font-medium">Smartphones</p>
+              <p className="text-primary font-bold">Extra 10% Off</p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Featured Products */}
-      <section className="container mx-auto px-4 bg-secondary/30 py-16 rounded-[2.5rem]">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h2 className="font-headline font-bold text-4xl mb-2">Featured Products</h2>
-            <p className="text-muted-foreground">Handpicked excellence for our valued customers.</p>
+        {/* Center Products Grid */}
+        <div className="md:col-span-3 space-y-4">
+          <div className="bg-white p-6 rounded shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Best of Electronics</h2>
+              <Link href="/products">
+                <Button className="bg-primary hover:bg-primary/90 rounded-sm">View All</Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
           </div>
-          <Link href="/products?featured=true">
-            <Button variant="ghost" className="font-bold text-primary">
-              View All <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
 
-      {/* Deals Section */}
-      <section className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="relative h-[300px] rounded-[2rem] overflow-hidden group">
-            <Image
-              src={PlaceHolderImages.find(img => img.id === 'hero-2')?.imageUrl || ''}
-              alt="Fashion Deal"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-700"
-              data-ai-hint="fashion sale"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-center p-10 space-y-4">
-              <span className="text-accent font-bold uppercase tracking-widest text-sm">Flash Sale</span>
-              <h3 className="text-white font-headline font-bold text-4xl">UP TO 50% OFF <br /> FASHION</h3>
-              <Button size="lg" className="w-fit rounded-full px-8">Shop Now</Button>
+          {/* Features Bar */}
+          <div className="bg-white p-6 rounded shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="flex items-center gap-3">
+              <Truck className="w-8 h-8 text-primary" />
+              <div>
+                <h4 className="font-bold text-sm">Free Delivery</h4>
+                <p className="text-[10px] text-muted-foreground">Orders above ₹499</p>
+              </div>
             </div>
-          </div>
-          <div className="relative h-[300px] rounded-[2rem] overflow-hidden group">
-            <Image
-              src={PlaceHolderImages.find(img => img.id === 'cat-electronics')?.imageUrl || ''}
-              alt="Electronics Deal"
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-700"
-              data-ai-hint="tech sale"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 to-transparent flex flex-col justify-center p-10 space-y-4">
-              <span className="text-accent font-bold uppercase tracking-widest text-sm">Tech Week</span>
-              <h3 className="text-white font-headline font-bold text-4xl">PREMIUM GADGETS <br /> STARTING $99</h3>
-              <Button size="lg" className="w-fit rounded-full px-8">Upgrade Now</Button>
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+              <div>
+                <h4 className="font-bold text-sm">Safe Payments</h4>
+                <p className="text-[10px] text-muted-foreground">100% Secure Transaction</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <RotateCcw className="w-8 h-8 text-primary" />
+              <div>
+                <h4 className="font-bold text-sm">Easy Returns</h4>
+                <p className="text-[10px] text-muted-foreground">Hassle-free 10 day policy</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone className="w-8 h-8 text-primary" />
+              <div>
+                <h4 className="font-bold text-sm">24/7 Support</h4>
+                <p className="text-[10px] text-muted-foreground">Always here to help</p>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
