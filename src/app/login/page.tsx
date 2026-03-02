@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ShieldCheck, Info, ArrowRight, Loader2 } from 'lucide-react';
+import { Info, Loader2, Smartphone, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -24,9 +25,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 const phoneSchema = z.object({
   phoneNumber: z.string().length(10, 'Enter a valid 10-digit mobile number'),
@@ -66,12 +74,16 @@ export default function LoginPage() {
 
   const setupRecaptcha = () => {
     if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          // reCAPTCHA solved
-        },
-      });
+      try {
+        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA solved
+          },
+        });
+      } catch (error) {
+        console.error("Recaptcha init error:", error);
+      }
     }
   };
 
@@ -88,14 +100,14 @@ export default function LoginPage() {
       toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
     } catch (error: any) {
       console.error("Phone sign-in error:", error);
-      let message = "Could not send OTP. Please check your network or try again later.";
+      let message = "Could not send OTP. Please try again.";
       
       if (error.code === 'auth/operation-not-allowed') {
-        message = "Phone authentication is not enabled in Firebase Console.";
+        message = "Phone auth not enabled. Please enable it in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
         message = "Too many attempts. Please try again later.";
-      } else if (error.message?.includes('billing')) {
-        message = "Firebase SMS requires a billing plan in some regions. Use a test number if developing.";
+      } else if (error.message?.toLowerCase().includes('billing')) {
+        message = "Firebase requires a Blaze plan for SMS. Use a test number if developing.";
       }
       
       toast({
@@ -103,7 +115,8 @@ export default function LoginPage() {
         title: "Error",
         description: message,
       });
-      // Reset recaptcha on error
+
+      // Clear recaptcha on error to allow retry
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.clear();
         (window as any).recaptchaVerifier = null;
@@ -153,7 +166,7 @@ export default function LoginPage() {
     <div className="min-h-[calc(100vh-64px)] bg-[#f1f3f6] flex items-center justify-center p-4">
       <div id="recaptcha-container"></div>
       <div className="max-w-4xl w-full bg-white rounded-sm shadow-md overflow-hidden flex flex-col md:flex-row min-h-[520px]">
-        {/* Left Side Branding */}
+        {/* Left Side Branding - Flipkart Style */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
             <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
@@ -226,15 +239,29 @@ export default function LoginPage() {
                   control={otpForm.control}
                   name="otp"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500">Enter 6-digit OTP</FormLabel>
+                    <FormItem className="flex flex-col items-center space-y-4">
+                      <FormLabel className="text-xs font-bold text-gray-500 self-start">Enter 6-digit OTP</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="000000" 
-                          {...field} 
-                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-0 h-12 text-2xl tracking-[1em] text-center" 
+                        <InputOTP
+                          maxLength={6}
+                          value={field.value}
+                          onChange={field.onChange}
+                          render={({ slots }) => (
+                            <InputOTPGroup>
+                              {slots.slice(0, 3).map((slot, index) => (
+                                <InputOTPSlot key={index} {...slot} index={index} />
+                              ))}
+                              <InputOTPSeparator />
+                              {slots.slice(3).map((slot, index) => (
+                                <InputOTPSlot key={index + 3} {...slot} index={index + 3} />
+                              ))}
+                            </InputOTPGroup>
+                          )}
                         />
                       </FormControl>
+                      <FormDescription className="text-xs">
+                        Input the code sent via SMS.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -249,7 +276,10 @@ export default function LoginPage() {
                   </Button>
                   <button 
                     type="button"
-                    onClick={() => setStep('phone')}
+                    onClick={() => {
+                        setStep('phone');
+                        otpForm.reset();
+                    }}
                     className="w-full text-center text-primary font-bold text-sm hover:underline"
                   >
                     Resend OTP or Change Number
@@ -259,13 +289,22 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <Alert className="mt-8 bg-blue-50 border-blue-100 text-blue-800">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-xs font-bold uppercase tracking-wider">Note for Prototype</AlertTitle>
-            <AlertDescription className="text-[10px]">
-              If real SMS fails, ensure "Phone Auth" is enabled in Firebase Console and use a "Test Number" for instant verification without SMS.
-            </AlertDescription>
-          </Alert>
+          <div className="mt-8 space-y-4">
+             <div className="bg-green-50 border border-green-100 p-3 rounded flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-green-800">
+                    Real-time SMS is enabled for your Blaze account. Ensure "Phone Auth" is enabled in Firebase Console.
+                </p>
+             </div>
+             
+             <Alert className="bg-blue-50 border-blue-100 text-blue-800">
+                <Info className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-xs font-bold uppercase tracking-wider">Developer Tip</AlertTitle>
+                <AlertDescription className="text-[10px]">
+                  Use "Test Phone Numbers" in the Firebase Console to test instantly without waiting for real SMS or incurring costs.
+                </AlertDescription>
+             </Alert>
+          </div>
 
           <div className="mt-12 text-center border-t pt-6 w-full">
              <Link href="/register" className="text-primary font-bold text-sm hover:underline">
