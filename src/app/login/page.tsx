@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -15,7 +14,7 @@ import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, Phone, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -50,7 +49,7 @@ export default function LoginPage() {
   const db = useFirestore();
   
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [verificationId, setVerificationId] = useState<ConfirmationResult | null>(null);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -95,7 +94,7 @@ export default function LoginPage() {
       const formatPhone = `+91${values.phoneNumber}`;
       
       const confirmation = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
-      setVerificationId(confirmation);
+      setConfirmationResult(confirmation);
       setStep('otp');
       toast({ title: "OTP Sent", description: `Verification code sent to +91 ${values.phoneNumber}` });
     } catch (error: any) {
@@ -105,7 +104,7 @@ export default function LoginPage() {
       if (error.code === 'auth/operation-not-allowed') {
         message = "Phone auth is not enabled in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
-        message = "Rate limit exceeded. Use a 'Test Number' in Firebase Console.";
+        message = "Rate limit exceeded. Use a 'Test Number' in Firebase Console or check Blaze plan settings.";
       }
       
       toast({
@@ -125,10 +124,10 @@ export default function LoginPage() {
   };
 
   const onOtpSubmit = async (values: z.infer<typeof otpSchema>) => {
-    if (!verificationId) return;
+    if (!confirmationResult) return;
     setIsLoading(true);
     try {
-      const result = await verificationId.confirm(values.otp);
+      const result = await confirmationResult.confirm(values.otp);
       const firebaseUser = result.user;
 
       if (db) {
@@ -289,7 +288,7 @@ export default function LoginPage() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-xs font-bold text-green-800 uppercase tracking-tight">Blaze Plan Enabled</AlertTitle>
                 <AlertDescription className="text-[10px] text-green-700 font-medium">
-                  Real SMS active. Use "Test Numbers" in Firebase Console for free instant verification during development.
+                  Real SMS active. For testing, add your mobile number as a "Test Number" in the Firebase Console.
                 </AlertDescription>
              </Alert>
           </div>

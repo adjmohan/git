@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -43,7 +42,7 @@ export default function CheckoutPage() {
 
   // Owner Merchant Details
   const MERCHANT_UPI = "adjmohan@oksbi";
-  const MERCHANT_NAME = "Flipkart Clone Store";
+  const MERCHANT_NAME = "Verified Merchant: adjmohan";
 
   useEffect(() => {
     setMounted(true);
@@ -65,22 +64,19 @@ export default function CheckoutPage() {
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
     if (values.paymentMethod === 'upi') {
-      // Construct UPI Deep Link for One-Click Payment
-      // pa: payee address, pn: payee name, am: amount, cu: currency, tn: transaction note
+      // Construct UPI Deep Link for Real-Time Payment
       const formattedAmount = total.toFixed(2);
       const upiUrl = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent('Flipkart Order')}`;
       
       toast({
-        title: "Redirecting to UPI",
-        description: "Opening GPay/PhonePe/UPI app to complete payment...",
+        title: "Opening Payment App",
+        description: "Redirecting to GPay/PhonePe/UPI to complete payment...",
       });
 
-      // Attempt to open the UPI app intent
-      // Using window.location.assign for better deep link handling on mobile browsers
+      // Launch UPI Deep Link
       window.location.assign(upiUrl);
 
-      // We wait for the user to return. Since we can't track cross-app success via web,
-      // we simulate the order success for this demo/prototype.
+      // Simulate completion after a brief wait
       setTimeout(() => {
         clearCart();
         router.push('/order-success');
@@ -88,7 +84,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Handle other methods
     toast({
       title: "Processing Payment",
       description: "Verifying transaction with your bank...",
@@ -204,7 +199,7 @@ export default function CheckoutPage() {
                               <Smartphone className="w-5 h-5 text-primary" />
                               <div className="flex-1">
                                 <p className="font-bold text-gray-800">PhonePe / Google Pay / UPI</p>
-                                <p className="text-xs text-muted-foreground">One-click instant secure payment</p>
+                                <p className="text-xs text-muted-foreground">Instant deep-link to your payment app</p>
                               </div>
                               <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/upi-4e311a.svg" alt="UPI" className="h-4" />
                             </FormLabel>
@@ -246,10 +241,10 @@ export default function CheckoutPage() {
                       </div>
                       <p className="text-sm font-medium text-gray-600">Verified Recipient: <span className="font-bold text-gray-800">{MERCHANT_NAME}</span></p>
                       <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
-                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Owner Merchant ID</p>
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">UPI ID</p>
                         <p className="text-lg font-mono font-bold text-gray-900">{MERCHANT_UPI}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" below will automatically launch your GPay/UPI app.</p>
+                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" will launch your GPay or default UPI app automatically.</p>
                     </div>
                   )}
 
@@ -315,7 +310,7 @@ export default function CheckoutPage() {
             </div>
             <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products Verified to Merchant: <span className="underline">{MERCHANT_UPI}</span>.</p>
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Safe and Secure Payments. 100% Authentic Products. Paying to: <span className="underline">{MERCHANT_UPI}</span>.</p>
             </div>
           </div>
         </div>
