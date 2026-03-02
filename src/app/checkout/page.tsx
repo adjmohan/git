@@ -39,10 +39,6 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const total = getTotalPrice();
 
-  // Owner Merchant Details
-  const MERCHANT_UPI = "adjmohan@oksbi";
-  const MERCHANT_NAME = "Verified Merchant: adjmohan";
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -62,30 +58,9 @@ export default function CheckoutPage() {
   const paymentMethod = form.watch('paymentMethod');
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-    if (values.paymentMethod === 'upi') {
-      // Construct UPI Deep Link for Real-Time Payment
-      const formattedAmount = total.toFixed(2);
-      const upiUrl = `upi://pay?pa=${MERCHANT_UPI}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${formattedAmount}&cu=INR&tn=${encodeURIComponent('Flipkart Order')}`;
-      
-      toast({
-        title: "Opening Payment App",
-        description: "Redirecting to GPay/PhonePe/UPI to complete payment...",
-      });
-
-      // Launch UPI Deep Link to trigger GPay/PhonePe app intent
-      window.location.assign(upiUrl);
-
-      // Simulate completion after a brief wait for demo purposes
-      setTimeout(() => {
-        clearCart();
-        router.push('/order-success');
-      }, 8000);
-      return;
-    }
-
     toast({
       title: "Processing Payment",
-      description: "Verifying transaction with your bank...",
+      description: "Redirecting to payment gateway...",
     });
 
     setTimeout(() => {
@@ -198,7 +173,7 @@ export default function CheckoutPage() {
                               <Smartphone className="w-5 h-5 text-primary" />
                               <div className="flex-1">
                                 <p className="font-bold text-gray-800">Instant UPI (GPay / PhonePe)</p>
-                                <p className="text-xs text-muted-foreground">Real-time payment to verified merchant</p>
+                                <p className="text-xs text-muted-foreground">Safe and secure digital payment</p>
                               </div>
                               <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/upi-4e311a.svg" alt="UPI" className="h-4" />
                             </FormLabel>
@@ -230,24 +205,6 @@ export default function CheckoutPage() {
                     </FormItem>
                   )}
                 />
-
-                <div className="bg-secondary/30 p-6 rounded shadow-inner border border-border text-center">
-                  {paymentMethod === 'upi' && (
-                    <div className="space-y-4">
-                      <p className="text-sm font-medium text-gray-600">Recipient: <span className="font-bold text-gray-800">{MERCHANT_UPI}</span></p>
-                      <div className="bg-primary/5 p-4 rounded-sm border border-primary/20 inline-block">
-                        <p className="text-lg font-headline font-bold text-primary">Verified Merchant: adjmohan</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground italic">Clicking "Pay" will open your UPI app automatically.</p>
-                    </div>
-                  )}
-                  {paymentMethod === 'cod' && (
-                    <div className="py-4 space-y-2">
-                      <CheckCircle className="w-10 h-10 text-green-600 mx-auto" />
-                      <p className="text-sm font-bold text-gray-700 uppercase">Pay on Delivery Available</p>
-                    </div>
-                  )}
-                </div>
               </div>
 
               <Button type="submit" size="lg" className="w-full h-14 rounded-sm text-lg font-bold shadow-lg shadow-primary/20 uppercase tracking-wider">
@@ -283,7 +240,7 @@ export default function CheckoutPage() {
             </div>
             <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 font-bold leading-relaxed">Verified Merchant Payment to: <span className="underline">{MERCHANT_UPI}</span>.</p>
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Secure payment verified by Flipkart.</p>
             </div>
           </div>
         </div>
