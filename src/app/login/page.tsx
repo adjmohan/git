@@ -37,6 +37,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
+    // If user is already logged in, redirect to home
     if (!isUserLoading && user) {
       router.push('/');
     }
