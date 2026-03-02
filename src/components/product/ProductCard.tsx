@@ -33,14 +33,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     : 0;
 
   return (
-    <Link href={`/products/${product.id}`} className="group bg-white dark:bg-card rounded shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full relative border border-transparent hover:border-border">
+    <Link href={`/products/${product.id}`} className="group bg-white dark:bg-card rounded shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full relative border border-transparent hover:border-border overflow-hidden">
       {/* Favorite Button */}
-      <button className="absolute top-2 right-2 z-10 p-1.5 bg-white/90 rounded-full text-muted-foreground hover:text-red-500 transition-all border border-gray-100">
+      <button className="absolute top-2 right-2 z-10 p-1.5 bg-white/90 rounded-full text-muted-foreground hover:text-red-500 transition-all border border-gray-100 shadow-sm">
         <Heart className="w-4 h-4" />
       </button>
 
       {/* Product Image */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-white">
+      <div className="relative aspect-[3/4] overflow-hidden bg-white flex items-center justify-center">
         {product.image ? (
           <Image
             src={product.image}
@@ -56,16 +56,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Product Details */}
-      <div className="p-3 flex flex-col flex-grow text-center">
-        <h3 className="font-bold text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors">
+      <div className="p-3 flex flex-col flex-grow text-left space-y-2">
+        <h3 className="font-bold text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors h-5 overflow-hidden">
           {product.name}
         </h3>
         
-        <div className="mb-2 flex justify-center">
+        <div className="flex justify-start">
           <RatingStars rating={product.rating} count={product.reviewCount} />
         </div>
 
-        <div className="flex flex-col items-center gap-1 mt-auto">
+        <div className="flex flex-col items-start gap-1 mt-auto">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-foreground">
               ${product.price.toLocaleString()}
@@ -75,18 +75,18 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 ${product.originalPrice.toLocaleString()}
               </span>
             )}
+            {discount > 0 && (
+              <span className="text-[10px] text-green-600 font-bold">
+                {discount}% off
+              </span>
+            )}
           </div>
-          {discount > 0 && (
-            <span className="text-[10px] text-green-600 font-bold">
-              {discount}% off
-            </span>
-          )}
         </div>
 
         <Button 
           variant="secondary" 
           size="sm" 
-          className="mt-3 w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs h-8"
+          className="mt-2 w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs h-8 border-none"
           onClick={handleAddToCart}
         >
           Add to Cart

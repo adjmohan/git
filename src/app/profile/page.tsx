@@ -1,9 +1,9 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser, useAuth } from '@/firebase';
-import { User, Package, Heart, CreditCard, Power, ChevronRight, MapPin } from 'lucide-react';
+import { User, Package, Heart, CreditCard, Power, ChevronRight, MapPin, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
@@ -14,15 +14,20 @@ export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
-  if (isUserLoading) {
+  useEffect(() => {
+    setMounted(true);
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (!mounted || isUserLoading) {
     return <div className="min-h-screen bg-gray-100 flex items-center justify-center">Loading Profile...</div>;
   }
 
-  if (!user) {
-    router.push('/login');
-    return null;
-  }
+  if (!user) return null;
 
   const handleLogout = async () => {
     try {
@@ -38,7 +43,7 @@ export default function ProfilePage() {
     { icon: Package, title: "My Orders", subtitle: "Check your order status", href: "/orders" },
     { icon: User, title: "Profile Information", subtitle: "Personal Details, Email", href: "/profile/edit" },
     { icon: MapPin, title: "Manage Addresses", subtitle: "Save addresses for a faster checkout", href: "/profile/addresses" },
-    { icon: CreditCard, title: "PAN Card Information", subtitle: "Keep your records updated", href: "/profile/pan" },
+    { icon: Smartphone, title: "Mobile Verification", subtitle: "Update your verified number", href: "/profile/mobile" },
     { icon: Heart, title: "Wishlist", subtitle: "All your saved items", href: "/wishlist" },
   ];
 
@@ -53,17 +58,17 @@ export default function ProfilePage() {
               <Avatar className="w-12 h-12">
                 <AvatarImage src={user.photoURL || ''} />
                 <AvatarFallback className="bg-primary text-white font-bold">
-                  {user.displayName?.[0] || user.email?.[0]?.toUpperCase()}
+                  {user.displayName?.[0] || user.email?.[0] || user.phoneNumber?.[user.phoneNumber.length - 1] || 'U'}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-grow">
+              <div className="flex-grow overflow-hidden">
                 <p className="text-[10px] text-gray-500">Hello,</p>
-                <h2 className="font-bold truncate">{user.displayName || user.email}</h2>
+                <h2 className="font-bold truncate">{user.displayName || user.phoneNumber || user.email}</h2>
               </div>
             </div>
 
             {/* Account Settings Side Nav */}
-            <div className="bg-white rounded shadow-sm overflow-hidden">
+            <div className="bg-white rounded shadow-sm overflow-hidden hidden md:block">
               <div className="p-4 border-b flex items-center gap-3 text-primary font-bold">
                  <User className="w-5 h-5" />
                  Account Settings
@@ -75,10 +80,6 @@ export default function ProfilePage() {
                  </button>
                  <button className="p-4 hover:bg-gray-50 text-left text-sm flex items-center justify-between group">
                     Manage Addresses
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-primary" />
-                 </button>
-                 <button className="p-4 hover:bg-gray-50 text-left text-sm flex items-center justify-between group">
-                    PAN Card Information
                     <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-primary" />
                  </button>
               </div>
@@ -100,16 +101,20 @@ export default function ProfilePage() {
              <h2 className="text-xl font-bold mb-8">Personal Information</h2>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                   <p className="text-xs text-gray-500 font-medium">Display Name</p>
-                   <p className="font-medium p-2 bg-gray-50 rounded">{user.displayName || 'Not Provided'}</p>
+                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Display Name</p>
+                   <p className="font-medium p-3 bg-gray-50 rounded border border-gray-100">{user.displayName || 'Not Provided'}</p>
                 </div>
                 <div className="space-y-2">
-                   <p className="text-xs text-gray-500 font-medium">Email Address</p>
-                   <p className="font-medium p-2 bg-gray-50 rounded">{user.email}</p>
+                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Mobile Number</p>
+                   <p className="font-medium p-3 bg-gray-50 rounded border border-gray-100">{user.phoneNumber || 'Not Linked'}</p>
                 </div>
                 <div className="space-y-2">
-                   <p className="text-xs text-gray-500 font-medium">Account ID</p>
-                   <p className="text-[10px] font-mono p-2 bg-gray-50 rounded text-gray-400">{user.uid}</p>
+                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Email Address</p>
+                   <p className="font-medium p-3 bg-gray-50 rounded border border-gray-100">{user.email || 'Not Provided'}</p>
+                </div>
+                <div className="space-y-2">
+                   <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">User UID</p>
+                   <p className="text-[10px] font-mono p-3 bg-gray-50 rounded text-gray-400 truncate">{user.uid}</p>
                 </div>
              </div>
 

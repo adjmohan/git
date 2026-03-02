@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { MapPin, CreditCard, ChevronLeft, ShieldCheck, CheckCircle2, ShoppingBag, Smartphone, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCartStore } from '@/store/useCartStore';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
@@ -28,9 +29,11 @@ const checkoutSchema = z.object({
   address: z.string().min(10, 'Full address is required'),
   city: z.string().min(2, 'City is required'),
   zip: z.string().min(5, 'Valid ZIP code required'),
-  cardNumber: z.string().min(16, 'Valid card number required').max(16),
-  expiry: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'MM/YY format'),
-  cvv: z.string().min(3, 'Required').max(4),
+  paymentMethod: z.enum(['card', 'upi', 'cod']),
+  upiId: z.string().optional(),
+  cardNumber: z.string().optional(),
+  expiry: z.string().optional(),
+  cvv: z.string().optional(),
 });
 
 export default function CheckoutPage() {
@@ -51,11 +54,11 @@ export default function CheckoutPage() {
       address: '',
       city: '',
       zip: '',
-      cardNumber: '',
-      expiry: '',
-      cvv: '',
+      paymentMethod: 'card',
     },
   });
+
+  const paymentMethod = form.watch('paymentMethod');
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
     console.log('Order placed:', values);
@@ -63,9 +66,7 @@ export default function CheckoutPage() {
     router.push('/order-success');
   };
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
   if (items.length === 0) {
     return (
@@ -180,56 +181,155 @@ export default function CheckoutPage() {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 text-xl font-headline font-bold">
                   <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">2</div>
-                  Payment Details
+                  Payment Options
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-secondary/50 p-6 rounded-[2rem] border border-border">
-                  <FormField
-                    control={form.control}
-                    name="cardNumber"
-                    render={({ field }) => (
-                      <FormItem className="sm:col-span-2">
-                        <FormLabel>Card Number</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <Input placeholder="0000 0000 0000 0000" {...field} className="pl-10 rounded-xl h-12" />
+
+                <FormField
+                  control={form.control}
+                  name="paymentMethod"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-2"
+                        >
+                          <div className={cn("flex items-center space-x-3 space-y-0 border p-4 rounded-xl cursor-pointer transition-colors", field.value === 'card' ? 'bg-primary/5 border-primary' : 'bg-white')}>
+                            <RadioGroupItem value="card" id="card" />
+                            <FormLabel htmlFor="card" className="flex flex-1 items-center gap-3 cursor-pointer">
+                              <CreditCard className="w-5 h-5 text-primary" />
+                              <div className="flex-1">
+                                <p className="font-bold">Credit / Debit Card</p>
+                                <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay</p>
+                              </div>
+                            </FormLabel>
                           </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="expiry"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Expiry Date</FormLabel>
-                        <FormControl>
-                          <Input placeholder="MM/YY" {...field} className="rounded-xl h-12" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="cvv"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>CVV</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123" type="password" maxLength={4} {...field} className="rounded-xl h-12" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
+                          <div className={cn("flex items-center space-x-3 space-y-0 border p-4 rounded-xl cursor-pointer transition-colors", field.value === 'upi' ? 'bg-primary/5 border-primary' : 'bg-white')}>
+                            <RadioGroupItem value="upi" id="upi" />
+                            <FormLabel htmlFor="upi" className="flex flex-1 items-center gap-3 cursor-pointer">
+                              <Smartphone className="w-5 h-5 text-primary" />
+                              <div className="flex-1">
+                                <p className="font-bold">UPI Payments</p>
+                                <p className="text-xs text-muted-foreground">GPay, PhonePe, Paytm</p>
+                              </div>
+                            </FormLabel>
+                          </div>
+
+                          <div className={cn("flex items-center space-x-3 space-y-0 border p-4 rounded-xl cursor-pointer transition-colors", field.value === 'cod' ? 'bg-primary/5 border-primary' : 'bg-white')}>
+                            <RadioGroupItem value="cod" id="cod" />
+                            <FormLabel htmlFor="cod" className="flex flex-1 items-center gap-3 cursor-pointer">
+                              <Wallet className="w-5 h-5 text-primary" />
+                              <div className="flex-1">
+                                <p className="font-bold">Cash on Delivery</p>
+                                <p className="text-xs text-muted-foreground">Pay when your order arrives</p>
+                              </div>
+                            </FormLabel>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="bg-secondary/30 p-6 rounded-2xl border border-dashed border-border mt-4">
+                  {paymentMethod === 'card' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="cardNumber"
+                        render={({ field }) => (
+                          <FormItem className="sm:col-span-2">
+                            <FormLabel>Card Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="0000 0000 0000 0000" {...field} className="rounded-xl h-11" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="expiry"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Expiry Date</FormLabel>
+                            <FormControl>
+                              <Input placeholder="MM/YY" {...field} className="rounded-xl h-11" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="cvv"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CVV</FormLabel>
+                            <FormControl>
+                              <Input placeholder="123" type="password" {...field} className="rounded-xl h-11" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+
+                  {paymentMethod === 'upi' && (
+                    <div className="space-y-4">
+                      <div className="flex justify-center gap-6 mb-4">
+                         {/* UPI Icons Placeholder */}
+                         <div className="flex flex-col items-center gap-1">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border p-1 shadow-sm">
+                               <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Google_Pay_Logo.svg" alt="GPay" className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">GPay</span>
+                         </div>
+                         <div className="flex flex-col items-center gap-1">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border p-1 shadow-sm">
+                               <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/PhonePe_Logo.svg" alt="PhonePe" className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">PhonePe</span>
+                         </div>
+                         <div className="flex flex-col items-center gap-1">
+                            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border p-1 shadow-sm">
+                               <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Paytm_Logo_%28standalone%29.svg" alt="Paytm" className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">Paytm</span>
+                         </div>
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="upiId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>UPI ID (e.g., user@upi)</FormLabel>
+                            <FormControl>
+                              <Input placeholder="username@bank" {...field} className="rounded-xl h-11" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <p className="text-[10px] text-muted-foreground text-center">A request will be sent to your UPI app for authorization.</p>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'cod' && (
+                    <div className="text-center py-4">
+                      <p className="font-medium">Cash / Card on Delivery</p>
+                      <p className="text-xs text-muted-foreground">You can pay using cash or via QR code on delivery.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <Button type="submit" size="lg" className="w-full h-16 rounded-[1.5rem] text-xl font-bold shadow-xl shadow-primary/20">
-                Complete Purchase • ${total.toLocaleString()}
+                Place Order • ${total.toLocaleString()}
               </Button>
             </form>
           </Form>
@@ -293,4 +393,8 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
+}
+
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(' ');
 }

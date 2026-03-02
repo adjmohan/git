@@ -8,7 +8,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Product, Category } from '@/types';
 
-// Mock data for initial render
+// Stable Mock data
 const categories: Category[] = [
   { id: '1', name: 'Electronics', slug: 'electronics', image: PlaceHolderImages.find(img => img.id === 'cat-electronics')?.imageUrl || '' },
   { id: '2', name: 'Fashion', slug: 'fashion', image: PlaceHolderImages.find(img => img.id === 'cat-fashion')?.imageUrl || '' },
@@ -80,9 +80,9 @@ export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-1')?.imageUrl;
 
   return (
-    <div className="flex flex-col gap-8 pb-20 bg-gray-100">
+    <div className="flex flex-col gap-8 pb-20 bg-gray-100 min-h-screen">
       {/* Hero Banner Section */}
-      <section className="relative w-full h-[300px] overflow-hidden">
+      <section className="relative w-full h-[200px] md:h-[300px] overflow-hidden">
         {heroImage && (
           <Image
             src={heroImage}
@@ -92,12 +92,12 @@ export default function Home() {
             priority
           />
         )}
-        <div className="absolute inset-0 bg-black/10 flex items-center px-10">
-          <div className="max-w-lg text-white space-y-4">
-             <h1 className="text-4xl md:text-6xl font-bold drop-shadow-lg text-white">Big Billion Days</h1>
-             <p className="text-xl drop-shadow-md text-white">Biggest Offers of the Year!</p>
+        <div className="absolute inset-0 bg-black/10 flex items-center px-4 md:px-10">
+          <div className="max-w-lg text-white space-y-2 md:space-y-4">
+             <h1 className="text-3xl md:text-6xl font-bold drop-shadow-lg text-white">Big Billion Days</h1>
+             <p className="text-base md:text-xl drop-shadow-md text-white font-medium">Biggest Offers of the Year!</p>
              <Link href="/products">
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold rounded-sm px-8">
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold rounded-sm px-8 h-10 md:h-12">
                   Shop Now
                 </Button>
              </Link>
@@ -106,11 +106,11 @@ export default function Home() {
       </section>
 
       {/* Category Icons Bar */}
-      <section className="bg-white py-4 shadow-sm overflow-x-auto whitespace-nowrap">
-        <div className="container mx-auto px-4 flex justify-between gap-8 min-w-max">
+      <section className="bg-white py-4 shadow-sm overflow-x-auto scrollbar-hide">
+        <div className="container mx-auto px-4 flex justify-between gap-6 md:gap-8 min-w-max">
           {categories.map((cat) => (
             <Link key={cat.id} href={`/products?category=${cat.slug}`} className="flex flex-col items-center gap-2 group">
-              <div className="relative w-16 h-16 rounded-full overflow-hidden transition-transform group-hover:scale-110 bg-gray-50">
+              <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-full overflow-hidden transition-transform group-hover:scale-110 bg-gray-50 border border-gray-100">
                 {cat.image && (
                   <Image
                     src={cat.image}
@@ -120,74 +120,84 @@ export default function Home() {
                   />
                 )}
               </div>
-              <span className="text-sm font-bold text-gray-700">{cat.name}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-700">{cat.name}</span>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Main Grid Section */}
-      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Left Sidebar Ad */}
-        <div className="hidden md:block bg-white p-4 rounded shadow-sm h-fit space-y-4">
-          <h3 className="font-bold border-b pb-2">Deals of the Day</h3>
+        <div className="hidden md:block bg-white p-4 rounded shadow-sm h-fit space-y-4 sticky top-20">
+          <h3 className="font-bold border-b pb-2 text-lg">Deals of the Day</h3>
           <div className="space-y-4">
-            <div className="text-center group cursor-pointer">
+            <div className="text-center group cursor-pointer border rounded-lg p-4 hover:border-primary transition-colors">
               <div className="relative aspect-square mb-2 overflow-hidden bg-gray-50 rounded">
                 {featuredProducts[0].image && (
                    <Image src={featuredProducts[0].image} alt="deal" fill className="object-contain group-hover:scale-105 transition-transform" />
                 )}
               </div>
-              <p className="text-sm font-medium">Smartphones</p>
+              <p className="text-sm font-bold mt-2">Smartphones</p>
               <p className="text-primary font-bold">Extra 10% Off</p>
             </div>
           </div>
         </div>
 
         {/* Center Products Grid */}
-        <div className="md:col-span-3 space-y-4">
-          <div className="bg-white p-6 rounded shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Best of Electronics</h2>
+        <div className="md:col-span-3 space-y-6">
+          <div className="bg-white p-4 md:p-6 rounded shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl md:text-2xl font-bold">Best of Electronics</h2>
               <Link href="/products">
-                <Button className="bg-primary hover:bg-primary/90 rounded-sm">View All</Button>
+                <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5">View All</Button>
               </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="h-full">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </div>
 
           {/* Features Bar */}
-          <div className="bg-white p-6 rounded shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="bg-white p-6 rounded shadow-sm grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             <div className="flex items-center gap-3">
-              <Truck className="w-8 h-8 text-primary" />
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h4 className="font-bold text-sm">Free Delivery</h4>
+                <h4 className="font-bold text-xs md:text-sm">Free Delivery</h4>
                 <p className="text-[10px] text-muted-foreground">Orders above ₹499</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <ShieldCheck className="w-8 h-8 text-primary" />
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h4 className="font-bold text-sm">Safe Payments</h4>
-                <p className="text-[10px] text-muted-foreground">100% Secure Transaction</p>
+                <h4 className="font-bold text-xs md:text-sm">Safe Payments</h4>
+                <p className="text-[10px] text-muted-foreground">100% Secure</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <RotateCcw className="w-8 h-8 text-primary" />
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                <RotateCcw className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h4 className="font-bold text-sm">Easy Returns</h4>
-                <p className="text-[10px] text-muted-foreground">Hassle-free 10 day policy</p>
+                <h4 className="font-bold text-xs md:text-sm">Easy Returns</h4>
+                <p className="text-[10px] text-muted-foreground">10 day policy</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Phone className="w-8 h-8 text-primary" />
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+                <Phone className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h4 className="font-bold text-sm">24/7 Support</h4>
-                <p className="text-[10px] text-muted-foreground">Always here to help</p>
+                <h4 className="font-bold text-xs md:text-sm">24/7 Support</h4>
+                <p className="text-[10px] text-muted-foreground">Always here</p>
               </div>
             </div>
           </div>
