@@ -1,0 +1,194 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * FLIPKART (COMMERCESTREAM) SECURITY RULES
+     *
+     * Core Philosophy:
+     * This ruleset enforces a strict user-ownership model for all personal data (profiles, addresses, 
+     * carts, and orders). Publicly accessible data (products and categories) is globally readable 
+     * but strictly protected by administrative roles.
+     *
+     * Data Structure:
+     * 1. /adminRoles/{userId}: Existence-based administrative flags.
+     * 2. /users/{userId}: Hierarchical root for all user-owned subcollections.
+     * 3. /products & /categories: Top-level public catalogs.
+     * 4. /products/{productId}/reviews: Public feedback nested under products for performance.
+     *
+     * Key Security Decisions:
+     * - Authorization Independence: User IDs are mirrored from the path into the document fields 
+     *   during creation to ensure relational integrity without complex lookups.
+     * - Admin Posture: Write access to the product catalog is restricted to users present in the 
+     *   /adminRoles collection.
+     * - Review Ownership: Reviews allow public reading but strictly limit modifications to the 
+     *   original author identified by the 'userId' field.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    // Basic check for authenticated users
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Checks if the authenticated user matches the provided ID (Path-based Ownership)
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Checks if a document exists and the owner is the requester
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // Checks for administrative privileges via the adminRoles collection
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/adminRoles/$(request.auth.uid));
+    }
+
+    // Validates that critical relational fields match the authenticated user during creation
+    function isValidOwnerField(field) {
+      return request.resource.data[field] == request.auth.uid;
+    }
+
+    // Enforces immutability of an ownership field during updates
+    function isFieldImmutable(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // --- RULES ---
+
+    /**
+     * @description Administrative role assignments. Existence of a document grants admin powers.
+     * @path /adminRoles/{userId}
+     * @allow (get) Any signed-in user can check if they (or someone else) are an admin.
+     * @deny (write) No client-side creation of admin roles is permitted.
+     * @principle Existence-based Database Access Control (DBAC).
+     */
+    match /adminRoles/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description User profile data tied to Auth UID.
+     * @path /users/{userId}
+     * @allow (get, list, create, update) The authenticated owner of the UID.
+     * @deny (delete) Profile deletion is restricted to preserve account integrity.
+     * @principle Path-based ownership for root user nodes.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if false;
+    }
+
+    /**
+     * @description User's personal shipping and billing addresses.
+     * @path /users/{userId}/addresses/{addressId}
+     * @allow (all) Full access for the owner of the user path.
+     * @deny (all) Any user whose UID does not match the parent {userId}.
+     * @principle Hierarchical path-based authorization.
+     */
+    match /users/{userId}/addresses/{addressId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isFieldImmutable('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Real-time shopping cart items for the user.
+     * @path /users/{userId}/cartItems/{cartItemId}
+     * @allow (all) Full access for the owner of the cart.
+     * @deny (create) If the userId field in the document doesn't match the path.
+     * @principle Path-consistency validation for relational integrity.
+     */
+    match /users/{userId}/cartItems/{cartItemId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isFieldImmutable('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Items saved to a user's wishlist.
+     * @path /users/{userId}/wishlistItems/{wishlistItemId}
+     * @allow (all) Full access for the owner of the wishlist.
+     * @deny (update) Attempting to transfer a wishlist item to another user.
+     * @principle Secure list management via ownership.
+     */
+    match /users/{userId}/wishlistItems/{wishlistItemId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && isFieldImmutable('userId');
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Historical records of user purchases.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (get, list, create) The user who placed the order.
+     * @deny (update, delete) Orders are immutable once placed to prevent fraud.
+     * @principle Immutable audit trails for financial transactions.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update, delete: if false;
+
+      /**
+       * @description Line items within a specific order.
+       * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+       * @allow (get, list, create) The owner of the parent order.
+       * @principle Deeply nested hierarchical ownership.
+       */
+      match /orderItems/{orderItemId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId);
+        allow update, delete: if false;
+      }
+    }
+
+    /**
+     * @description Product categories for browsing.
+     * @path /categories/{categoryId}
+     * @allow (get, list) Public access for all users.
+     * @deny (write) Any non-administrator.
+     * @principle Public catalog with admin-only management.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Individual products in the store.
+     * @path /products/{productId}
+     * @allow (get, list) Public access for shopping.
+     * @deny (write) Any non-administrator.
+     * @principle Public catalog with admin-only management.
+     */
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+
+      /**
+       * @description User reviews for a product.
+       * @path /products/{productId}/reviews/{reviewId}
+       * @allow (get, list) Public access to read reviews.
+       * @allow (create) Any signed-in user providing their own userId.
+       * @allow (update, delete) Only the original author of the review.
+       * @principle Public Read with Owner-Only Writes via denormalized userId.
+       */
+      match /reviews/{reviewId} {
+        allow get, list: if true;
+        allow create: if isSignedIn() && isValidOwnerField('userId');
+        allow update, delete: if resource != null && isOwner(resource.data.userId);
+      }
+    }
+  }
+}
