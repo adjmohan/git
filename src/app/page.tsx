@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, ArrowRight, Zap, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ChevronRight, ArrowRight, Zap, ShieldCheck, Truck, RotateCcw, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/product/ProductCard';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
