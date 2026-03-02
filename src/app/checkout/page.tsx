@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -328,8 +329,8 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full h-16 rounded-[1.5rem] text-xl font-bold shadow-xl shadow-primary/20">
-                Place Order • ${total.toLocaleString()}
+              <Button type="submit" size="lg" className="w-full h-16 rounded-[1.5rem] text-xl font-bold shadow-xl shadow-primary/20 uppercase">
+                Place Order • ₹{total.toLocaleString()}
               </Button>
             </form>
           </Form>
@@ -350,7 +351,7 @@ export default function CheckoutPage() {
                     <h4 className="text-sm font-bold line-clamp-1">{item.name}</h4>
                     <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                   </div>
-                  <span className="font-bold text-sm">${(item.price * item.quantity).toLocaleString()}</span>
+                  <span className="font-bold text-sm">₹{(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -360,7 +361,7 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span className="font-bold text-foreground">${total.toLocaleString()}</span>
+                <span className="font-bold text-foreground">₹{total.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Shipping</span>
@@ -368,7 +369,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-2xl font-bold text-primary pt-2">
                 <span>Total</span>
-                <span>${total.toLocaleString()}</span>
+                <span>₹{total.toLocaleString()}</span>
               </div>
             </div>
 
@@ -393,8 +394,4 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
-}
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
 }

@@ -4,7 +4,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Product } from '@/types';
 import { RatingStars } from './RatingStars';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </button>
 
       {/* Product Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-white flex items-center justify-center">
+      <div className="relative aspect-square overflow-hidden bg-white flex items-center justify-center">
         {product.image ? (
           <Image
             src={product.image}
@@ -56,41 +56,41 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </div>
 
       {/* Product Details */}
-      <div className="p-3 flex flex-col flex-grow text-left space-y-2">
-        <h3 className="font-bold text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors h-5 overflow-hidden">
+      <div className="p-4 flex flex-col flex-grow text-left">
+        <h3 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors min-h-[40px]">
           {product.name}
         </h3>
         
-        <div className="flex justify-start">
+        <div className="flex justify-start mb-2">
           <RatingStars rating={product.rating} count={product.reviewCount} />
         </div>
 
-        <div className="flex flex-col items-start gap-1 mt-auto">
+        <div className="mt-auto flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-foreground">
-              ${product.price.toLocaleString()}
+            <span className="text-base font-bold text-foreground">
+              ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
               <span className="text-xs text-muted-foreground line-through">
-                ${product.originalPrice.toLocaleString()}
+                ₹{product.originalPrice.toLocaleString()}
               </span>
             )}
             {discount > 0 && (
-              <span className="text-[10px] text-green-600 font-bold">
+              <span className="text-xs text-green-600 font-bold">
                 {discount}% off
               </span>
             )}
           </div>
-        </div>
 
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          className="mt-2 w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs h-8 border-none"
-          onClick={handleAddToCart}
-        >
-          Add to Cart
-        </Button>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="w-full bg-primary/5 hover:bg-primary hover:text-white rounded-sm text-xs font-bold h-9 border-none uppercase transition-colors"
+            onClick={handleAddToCart}
+          >
+            Add to Cart
+          </Button>
+        </div>
       </div>
     </Link>
   );

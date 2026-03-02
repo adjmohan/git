@@ -10,8 +10,10 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { toast } from '@/hooks/use-toast';
 import { Smartphone, ShieldCheck, ArrowRight } from 'lucide-react';
 
@@ -27,6 +29,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { user } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const [verificationId, setVerificationId] = useState<ConfirmationResult | null>(null);
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -67,10 +70,14 @@ export default function LoginPage() {
       toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
     } catch (error: any) {
       console.error(error);
+      const message = error.code === 'auth/operation-not-allowed' 
+        ? "Phone sign-in is not enabled in Firebase Console. Please enable it in the Authentication tab."
+        : error.message || "Failed to send OTP. Please try again.";
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to send OTP. Please try again.",
+        description: message,
       });
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.clear();
@@ -85,7 +92,22 @@ export default function LoginPage() {
     if (!verificationId) return;
     setIsLoading(true);
     try {
-      await verificationId.confirm(values.otp);
+      const result = await verificationId.confirm(values.otp);
+      const firebaseUser = result.user;
+
+      // Check if user profile exists in Firestore, if not create it
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        setDocumentNonBlocking(userRef, {
+          id: firebaseUser.uid,
+          phoneNumber: firebaseUser.phoneNumber,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }, { merge: true });
+      }
+
       toast({ title: "Welcome!", description: "Logged in successfully." });
       router.push('/');
     } catch (error: any) {
