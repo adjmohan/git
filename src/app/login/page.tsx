@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { 
@@ -73,14 +72,18 @@ export default function LoginPage() {
   });
 
   const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      try {
+    if (!auth) return;
+    try {
+      if (!(window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
+          callback: () => {
+            console.log("reCAPTCHA solved");
+          }
         });
-      } catch (error) {
-        console.error("Recaptcha init error:", error);
       }
+    } catch (error) {
+      console.error("reCAPTCHA error:", error);
     }
   };
 
@@ -94,17 +97,17 @@ export default function LoginPage() {
       const confirmation = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
       setVerificationId(confirmation);
       setStep('otp');
-      toast({ title: "OTP Sent", description: "Verification code sent to your mobile." });
+      toast({ title: "OTP Sent", description: `Verification code sent to +91 ${values.phoneNumber}` });
     } catch (error: any) {
-      console.error("Phone sign-in error:", error);
-      let message = "Could not send OTP. Please try again.";
+      console.error("Phone login error:", error);
+      let message = "Failed to send OTP. Please check your connection.";
       
       if (error.code === 'auth/operation-not-allowed') {
-        message = "Phone auth not enabled. Please enable it in Firebase Console.";
+        message = "Phone auth is not enabled in Firebase Console.";
       } else if (error.code === 'auth/too-many-requests') {
         message = "Too many attempts. Please try again later.";
-      } else if (error.message?.toLowerCase().includes('billing')) {
-        message = "Firebase requires a Blaze plan for SMS. Use a test number if developing.";
+      } else if (error.message?.includes('billing')) {
+        message = "Blaze plan required for real SMS. Use a Test Number for development.";
       }
       
       toast({
@@ -129,14 +132,11 @@ export default function LoginPage() {
       const result = await verificationId.confirm(values.otp);
       const firebaseUser = result.user;
 
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
-      
-      if (!userSnap.exists()) {
+      if (db) {
+        const userRef = doc(db, 'users', firebaseUser.uid);
         setDocumentNonBlocking(userRef, {
           id: firebaseUser.uid,
           phone: firebaseUser.phoneNumber,
-          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }, { merge: true });
       }
@@ -144,11 +144,11 @@ export default function LoginPage() {
       toast({ title: "Login Successful", description: "Welcome back to Flipkart!" });
       router.push('/profile');
     } catch (error: any) {
-      console.error("OTP Verification error:", error);
+      console.error("OTP Error:", error);
       toast({
         variant: "destructive",
         title: "Invalid OTP",
-        description: "The verification code entered is incorrect.",
+        description: "The code you entered is incorrect. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -170,7 +170,7 @@ export default function LoginPage() {
           <div className="hidden md:block">
              <img 
                src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/login_img_c4a81e.png" 
-               alt="Login Banner" 
+               alt="Flipkart Login" 
                className="w-full h-auto object-contain opacity-60" 
              />
           </div>
@@ -178,14 +178,14 @@ export default function LoginPage() {
 
         {/* Right Side Form */}
         <div className="p-10 flex-grow flex flex-col justify-center">
-          <div className="mb-8">
+          <div className="mb-8 text-center md:text-left">
             <h2 className="text-xl font-bold text-gray-800 mb-2">
               {step === 'phone' ? 'Mobile Login' : 'Verify OTP'}
             </h2>
             <p className="text-sm text-gray-500">
               {step === 'phone' 
-                ? 'Enter your mobile number to receive a one-time password.' 
-                : `Enter the 6-digit code sent to +91 ${phoneForm.getValues('phoneNumber')}`}
+                ? 'Enter your mobile number to get started.' 
+                : `We've sent a 6-digit code to +91 ${phoneForm.getValues('phoneNumber')}`}
             </p>
           </div>
 
@@ -198,11 +198,11 @@ export default function LoginPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-gray-500">Mobile Number</FormLabel>
-                      <div className="flex items-center border-b-2 border-gray-200 focus-within:border-primary transition-colors">
-                        <span className="text-gray-500 font-bold px-2">+91</span>
+                      <div className="flex items-center border-b-2 border-gray-200 focus-within:border-primary transition-all">
+                        <span className="text-gray-500 font-bold px-3">+91</span>
                         <FormControl>
                           <Input 
-                            placeholder="Enter 10-digit mobile number" 
+                            placeholder="Enter 10-digit number" 
                             {...field} 
                             className="border-none focus-visible:ring-0 rounded-none h-12 text-lg font-medium p-0" 
                           />
@@ -213,9 +213,9 @@ export default function LoginPage() {
                   )}
                 />
                 
-                <div className="space-y-4">
+                <div className="space-y-4 pt-4">
                   <p className="text-[10px] text-gray-400">
-                    By continuing, you agree to Flipkart's <span className="text-primary font-bold">Terms of Use</span> and <span className="text-primary font-bold">Privacy Policy</span>.
+                    By continuing, you agree to Flipkart's <span className="text-primary font-bold cursor-pointer">Terms of Use</span> and <span className="text-primary font-bold cursor-pointer">Privacy Policy</span>.
                   </p>
                   <Button 
                     type="submit" 
@@ -234,13 +234,14 @@ export default function LoginPage() {
                   control={otpForm.control}
                   name="otp"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col items-center space-y-4">
+                    <FormItem className="flex flex-col items-center space-y-6">
                       <FormLabel className="text-xs font-bold text-gray-500 self-start">Enter 6-digit OTP</FormLabel>
                       <FormControl>
                         <InputOTP
                           maxLength={6}
                           value={field.value}
                           onChange={field.onChange}
+                          className="gap-2"
                         >
                           <InputOTPGroup>
                             <InputOTPSlot index={0} />
@@ -255,14 +256,11 @@ export default function LoginPage() {
                           </InputOTPGroup>
                         </InputOTP>
                       </FormControl>
-                      <FormDescription className="text-xs">
-                        Input the code sent via SMS.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <div className="space-y-4">
+                <div className="space-y-4 pt-2">
                   <Button 
                     type="submit" 
                     disabled={isLoading} 
@@ -285,19 +283,12 @@ export default function LoginPage() {
             </Form>
           )}
 
-          <div className="mt-8 space-y-4">
-             <div className="bg-green-50 border border-green-100 p-3 rounded flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-green-800">
-                    Blaze billing detected. Real SMS is enabled. Ensure Authorized Domains are set in Firebase.
-                </p>
-             </div>
-             
-             <Alert className="bg-blue-50 border-blue-100 text-blue-800">
-                <Info className="h-4 w-4 text-blue-600" />
-                <AlertTitle className="text-xs font-bold uppercase tracking-wider">Developer Tip</AlertTitle>
-                <AlertDescription className="text-[10px]">
-                  Add your number as a "Test Phone Number" in Firebase Console to bypass SMS costs and reCAPTCHA during development.
+          <div className="mt-10 space-y-4">
+             <Alert className="bg-green-50 border-green-100">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertTitle className="text-xs font-bold text-green-800">Blaze Plan Enabled</AlertTitle>
+                <AlertDescription className="text-[10px] text-green-700">
+                  Real SMS is active. For faster testing, add your phone number as a "Test Number" in Firebase Console.
                 </AlertDescription>
              </Alert>
           </div>
