@@ -42,6 +42,20 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
+  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
+    resolver: zodResolver(phoneSchema),
+    defaultValues: {
+      phoneNumber: '',
+    },
+  });
+
+  const otpForm = useForm<z.infer<typeof otpSchema>>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: {
+      otp: '',
+    },
+  });
+
   const setupRecaptcha = () => {
     if ((window as any).recaptchaVerifier) return (window as any).recaptchaVerifier;
     
