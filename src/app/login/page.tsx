@@ -3,91 +3,71 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser, useAuth, useFirestore } from '@/firebase';
-import { signInAnonymously } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
-import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { Loader2, CheckCircle2, Phone, ShieldCheck } from 'lucide-react';
+import { useUser, useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Loader2, Mail, Lock, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-declare global {
-  interface Window {
-    phoneEmailVerify: (clientId: string) => void;
-    phoneEmailListener: (userObj: { phoneNumber: string; user_json_url: string }) => void;
-  }
-}
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const db = useFirestore();
   
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // User's Client ID
-  const CLIENT_ID = "15019613120387252998";
-
   useEffect(() => {
     setMounted(true);
-    if (user && !user.isAnonymous) {
+    if (!isUserLoading && user) {
       router.push('/');
     }
+  }, [user, isUserLoading, router]);
 
-    // Phone.Email Listener
-    window.phoneEmailListener = async (userObj) => {
-      setIsLoading(true);
-      try {
-        // Since we are using client-side only, we sign in anonymously 
-        // and link the phone number in Firestore for the profile.
-        const userCredential = await signInAnonymously(auth);
-        const firebaseUser = userCredential.user;
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-        if (db) {
-          const userRef = doc(db, 'users', firebaseUser.uid);
-          setDocumentNonBlocking(userRef, {
-            id: firebaseUser.uid,
-            phone: userObj.phoneNumber,
-            isVerified: true,
-            updatedAt: new Date().toISOString(),
-          }, { merge: true });
-        }
-
-        toast({ 
-          title: "Verification Successful", 
-          description: `Logged in with ${userObj.phoneNumber}` 
-        });
-        
-        router.push('/profile');
-      } catch (error: any) {
-        console.error("Verification Error:", error);
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: "Could not sync your verified number.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    return () => {
-      delete (window as any).phoneEmailListener;
-    };
-  }, [user, router, auth, db]);
-
-  const handleVerifyClick = () => {
-    if (typeof window.phoneEmailVerify === 'function') {
-      window.phoneEmailVerify(CLIENT_ID);
-    } else {
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
+    setIsLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      toast({ 
+        title: "Login Successful", 
+        description: "Welcome back to Flipkart!" 
+      });
+      router.push('/');
+    } catch (error: any) {
+      console.error("Login Error:", error);
       toast({
         variant: "destructive",
-        title: "Script Error",
-        description: "Verification script not ready. Please refresh.",
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,43 +93,81 @@ export default function LoginPage() {
 
         {/* Right Side Form */}
         <div className="p-10 flex-grow flex flex-col justify-center">
-          <div className="mb-10 text-center md:text-left">
+          <div className="mb-8 text-center md:text-left">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Mobile Verification
+              Login to your account
             </h2>
             <p className="text-sm text-gray-500 font-medium">
-              Flipkart uses real-time OTP to keep your account secure.
+              Enter your credentials to continue shopping.
             </p>
           </div>
 
-          <div className="space-y-8">
-            <div className="flex flex-col items-center gap-6 py-4">
-              <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center">
-                <Phone className="w-10 h-10 text-primary" />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase text-gray-400">Email Address</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input 
+                          placeholder="Enter Email" 
+                          {...field} 
+                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-7" 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase text-gray-400">Password</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input 
+                          type="password" 
+                          placeholder="Enter Password" 
+                          {...field} 
+                          className="rounded-none border-t-0 border-x-0 border-b-2 focus-visible:ring-0 focus:border-primary px-7" 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="pt-4 space-y-4">
+                 <p className="text-[10px] text-gray-400 font-medium text-center md:text-left">
+                  By continuing, you agree to Flipkart's <span className="text-primary font-bold cursor-pointer">Terms of Use</span> and <span className="text-primary font-bold cursor-pointer">Privacy Policy</span>.
+                 </p>
+                 <Button 
+                   type="submit"
+                   disabled={isLoading}
+                   size="lg"
+                   className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-14 rounded-sm uppercase tracking-wider shadow-lg"
+                 >
+                   {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Login'}
+                 </Button>
               </div>
-              <Button 
-                onClick={handleVerifyClick}
-                disabled={isLoading}
-                size="lg"
-                className="w-full bg-accent hover:bg-accent/90 text-white font-bold h-14 rounded-sm uppercase tracking-wider shadow-lg"
-              >
-                {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Verify with OTP'}
-              </Button>
-            </div>
-            
-            <div className="space-y-4 pt-4">
-              <p className="text-[10px] text-gray-400 font-medium text-center md:text-left">
-                By continuing, you agree to Flipkart's <span className="text-primary font-bold cursor-pointer">Terms of Use</span> and <span className="text-primary font-bold cursor-pointer">Privacy Policy</span>.
-              </p>
-            </div>
-          </div>
+            </form>
+          </Form>
 
           <div className="mt-8">
              <Alert className="bg-blue-50 border-blue-100">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                <AlertTitle className="text-xs font-bold text-primary uppercase tracking-tight">Real-Time OTP</AlertTitle>
+                <AlertTitle className="text-xs font-bold text-primary uppercase tracking-tight">Secure Login</AlertTitle>
                 <AlertDescription className="text-[10px] text-primary/80 font-medium">
-                  Verify your phone number instantly via the secure popup. No manual code entry required.
+                  Your credentials are encrypted and stored securely. We never share your personal data.
                 </AlertDescription>
              </Alert>
           </div>

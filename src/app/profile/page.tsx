@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { useUser, useAuth } from '@/firebase';
-import { User, Package, Heart, Power, ChevronRight, MapPin, Smartphone, ShieldCheck } from 'lucide-react';
+import { User, Package, Heart, Power, ChevronRight, MapPin, Mail, ShieldCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
@@ -27,7 +26,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <Smartphone className="w-12 h-12 text-primary animate-pulse mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
           <p className="font-bold">Loading Flipkart Profile...</p>
         </div>
       </div>
@@ -64,12 +63,12 @@ export default function ProfilePage() {
               <Avatar className="w-12 h-12">
                 <AvatarImage src={user.photoURL || ''} />
                 <AvatarFallback className="bg-primary text-white font-bold text-lg">
-                  {user.displayName?.[0] || 'U'}
+                  {user.displayName?.[0] || user.email?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-grow overflow-hidden">
                 <p className="text-[10px] text-gray-500 font-bold uppercase">Hello,</p>
-                <h2 className="font-bold truncate text-lg">Verified User</h2>
+                <h2 className="font-bold truncate text-lg">{user.displayName || 'Flipkart User'}</h2>
               </div>
             </div>
 
@@ -106,28 +105,28 @@ export default function ProfilePage() {
           <div className="md:w-2/3 bg-white p-8 rounded shadow-sm border border-gray-100">
              <div className="flex items-center justify-between mb-10">
                 <h2 className="text-2xl font-bold text-gray-800">Personal Information</h2>
-                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-3 py-1 flex items-center gap-1">
+                <Badge variant="secondary" className="bg-blue-50 text-primary hover:bg-blue-50 border-none px-3 py-1 flex items-center gap-1">
                    <ShieldCheck className="w-3 h-3" />
-                   Verified
+                   Standard Account
                 </Badge>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-3">
-                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Authentication Method</p>
-                   <p className="font-bold p-4 bg-gray-50 rounded border border-gray-100 text-gray-700">Phone.Email OTP</p>
+                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Email Address</p>
+                   <p className="font-bold p-4 bg-gray-50 rounded border border-gray-100 text-gray-700 truncate">{user.email}</p>
                 </div>
                 <div className="space-y-3">
-                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Verification Status</p>
-                   <p className="font-bold p-4 bg-green-50 rounded border border-green-100 text-green-700">Real-time Verified</p>
+                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Display Name</p>
+                   <p className="font-bold p-4 bg-gray-50 rounded border border-gray-100 text-gray-700">{user.displayName || 'Not Set'}</p>
                 </div>
                 <div className="space-y-3">
                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">User ID</p>
                    <p className="text-xs font-mono p-4 bg-gray-50 rounded text-gray-400 truncate border border-gray-100">{user.uid}</p>
                 </div>
                 <div className="space-y-3">
-                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Phone Link</p>
-                   <p className="font-bold p-4 bg-gray-50 rounded border border-gray-100 text-gray-700">Securely Linked</p>
+                   <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Account Type</p>
+                   <p className="font-bold p-4 bg-gray-50 rounded border border-gray-100 text-gray-700">Email Verified</p>
                 </div>
              </div>
 
@@ -152,5 +151,24 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function Loader2(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
   );
 }
