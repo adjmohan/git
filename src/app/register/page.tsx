@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { toast } from '@/hooks/use-toast';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
@@ -82,8 +82,8 @@ export default function RegisterPage() {
         {/* Left Side Info */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Looks like you're new here!</h1>
-            <p className="text-lg opacity-90">Sign up with your email to get started</p>
+            <h1 className="text-3xl font-bold mb-4 text-white">Looks like you're new here!</h1>
+            <p className="text-lg opacity-90 text-white">Sign up with your email to get started</p>
           </div>
           <div className="hidden md:block">
              <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/login_img_c4a81e.png" alt="Login Banner" className="w-full opacity-50" />

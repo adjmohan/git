@@ -106,8 +106,8 @@ export default function LoginPage() {
         {/* Left Side Info */}
         <div className="bg-primary p-10 text-white flex flex-col justify-between md:w-2/5">
           <div>
-            <h1 className="text-3xl font-bold mb-4">Login</h1>
-            <p className="text-lg opacity-90">Get access to your Orders, Wishlist and Recommendations</p>
+            <h1 className="text-3xl font-bold mb-4 text-white">Login</h1>
+            <p className="text-lg opacity-90 text-white">Get access to your Orders, Wishlist and Recommendations</p>
           </div>
           <div className="hidden md:block">
              <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/login_img_c4a81e.png" alt="Login Banner" className="w-full opacity-50" />
@@ -164,7 +164,7 @@ export default function LoginPage() {
                   name="otp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold text-gray-500">Enter 6-digit OTP</FormControl>
+                      <FormLabel className="text-xs font-bold text-gray-500">Enter 6-digit OTP</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="000000" 
