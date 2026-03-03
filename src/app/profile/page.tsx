@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useUser, useAuth } from '@/firebase';
 import { User, Package, Heart, Power, ChevronRight, MapPin, Loader2, ShieldCheck } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -134,16 +135,16 @@ export default function ProfilePage() {
                 <h3 className="text-xl font-bold mb-8 text-gray-800">Frequently Accessed</h3>
                 <div className="grid grid-cols-1 gap-4">
                    {menuItems.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-4 p-5 border rounded-lg hover:border-primary hover:bg-primary/5 cursor-pointer group transition-all">
-                         <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-full shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <item.icon className="w-6 h-6" />
-                         </div>
-                         <div className="flex-grow">
-                            <h4 className="font-bold text-base text-gray-800">{item.title}</h4>
-                            <p className="text-sm text-gray-500">{item.subtitle}</p>
-                         </div>
-                         <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
+                     <Link key={idx} href={item.href} className="flex items-center gap-4 p-5 border rounded-lg hover:border-primary hover:bg-primary/5 cursor-pointer group transition-all">
+                      <div className="w-12 h-12 bg-primary/10 text-primary flex items-center justify-center rounded-full shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                        <item.icon className="w-6 h-6" />
                       </div>
+                      <div className="flex-grow">
+                        <h4 className="font-bold text-base text-gray-800">{item.title}</h4>
+                        <p className="text-sm text-gray-500">{item.subtitle}</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" />
+                     </Link>
                    ))}
                 </div>
              </div>
