@@ -57,16 +57,16 @@ export default function CheckoutPage() {
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
     if (values.paymentMethod === 'upi') {
-      // Standard generic UPI link for simulation
+      // Professional UPI launch simulation
       window.location.assign('upi://pay?pa=merchant@upi&pn=VerifiedMerchant&am=' + total + '&cu=INR');
       
       toast({
-        title: "Redirecting to UPI",
-        description: "Please complete payment in your preferred app.",
+        title: "Launching Payment App",
+        description: "Opening your default UPI app...",
       });
     } else {
       toast({
-        title: "Processing Payment",
+        title: "Processing",
         description: "Redirecting to secure gateway...",
       });
     }
