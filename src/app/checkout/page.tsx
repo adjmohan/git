@@ -56,15 +56,25 @@ export default function CheckoutPage() {
   });
 
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
-    toast({
-      title: "Processing Payment",
-      description: "Redirecting to payment gateway...",
-    });
+    if (values.paymentMethod === 'upi') {
+      // Standard generic UPI link for simulation
+      window.location.assign('upi://pay?pa=merchant@upi&pn=VerifiedMerchant&am=' + total + '&cu=INR');
+      
+      toast({
+        title: "Redirecting to UPI",
+        description: "Please complete payment in your preferred app.",
+      });
+    } else {
+      toast({
+        title: "Processing Payment",
+        description: "Redirecting to secure gateway...",
+      });
+    }
 
     setTimeout(() => {
       clearCart();
       router.push('/order-success');
-    }, 2000);
+    }, 3000);
   };
 
   if (!mounted) return null;
@@ -218,7 +228,7 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 items-center">
                   <div className="relative w-12 h-12 bg-secondary rounded-sm overflow-hidden flex-shrink-0 p-1">
-                    <Image src={item.image} alt={item.name} fill className="object-contain" />
+                    <Image src={item.image} alt={item.name} width={48} height={48} className="object-contain" />
                   </div>
                   <div className="flex-grow">
                     <h4 className="text-xs font-bold line-clamp-1 text-gray-800">{item.name}</h4>
