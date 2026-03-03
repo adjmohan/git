@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { CreditCard, ChevronLeft, ShieldCheck, ShoppingBag, Smartphone, Wallet, CheckCircle } from 'lucide-react';
+import { CreditCard, ChevronLeft, ShieldCheck, ShoppingBag, Smartphone, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -55,8 +55,6 @@ export default function CheckoutPage() {
     },
   });
 
-  const paymentMethod = form.watch('paymentMethod');
-
   const onSubmit = (values: z.infer<typeof checkoutSchema>) => {
     toast({
       title: "Processing Payment",
@@ -96,7 +94,7 @@ export default function CheckoutPage() {
         <div className="space-y-10">
           <div>
             <h1 className="font-headline font-bold text-4xl mb-2 text-primary uppercase tracking-tight italic">Checkout</h1>
-            <p className="text-muted-foreground font-medium">Safe & Secure Payments Powered by Flipkart.</p>
+            <p className="text-muted-foreground font-medium">Safe & Secure Payments.</p>
           </div>
 
           <Form {...form}>
@@ -175,7 +173,6 @@ export default function CheckoutPage() {
                                 <p className="font-bold text-gray-800">Instant UPI (GPay / PhonePe)</p>
                                 <p className="text-xs text-muted-foreground">Safe and secure digital payment</p>
                               </div>
-                              <img src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/upi-4e311a.svg" alt="UPI" className="h-4" />
                             </FormLabel>
                           </div>
 
@@ -208,7 +205,7 @@ export default function CheckoutPage() {
               </div>
 
               <Button type="submit" size="lg" className="w-full h-14 rounded-sm text-lg font-bold shadow-lg shadow-primary/20 uppercase tracking-wider">
-                Pay ₹{total.toLocaleString()}
+                Proceed to Pay
               </Button>
             </form>
           </Form>
@@ -240,7 +237,7 @@ export default function CheckoutPage() {
             </div>
             <div className="bg-green-50 p-4 rounded-sm border border-green-100 flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 font-bold leading-relaxed">Secure payment verified by Flipkart.</p>
+              <p className="text-xs text-green-700 font-bold leading-relaxed">Secure payment verification active.</p>
             </div>
           </div>
         </div>
